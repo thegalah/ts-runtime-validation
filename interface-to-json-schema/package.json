@@ -10,7 +10,7 @@
         "typescript": "^4.0.5"
     },
     "scripts": {
-        "start": "tsc && env-cmd -f ./dev.env node dist/Startup.js",
+        "start": "tsc && node dist/Startup.js",
         "prettier": "prettier --write \"{src,web}/**/*.{js,jsx,ts,tsx}\" \"*.{js,json,md,yml,yaml}\""
     }
 }
