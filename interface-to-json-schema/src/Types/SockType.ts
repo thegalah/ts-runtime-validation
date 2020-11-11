@@ -5,5 +5,4 @@ export interface SockType {
     readonly OptionalString?: string;
     readonly OptionalNumber?: number;
     readonly Nested: MockType;
-    readonly Recursive: SockType;
 }
