@@ -10,8 +10,7 @@
         "typescript": "^4.0.5"
     },
     "scripts": {
-        "generate-validation-enum": "node ./.scripts/generate-validation-enum.js",
-        "generate-typecheck": "typescript-json-schema tsconfig.json * --out src/validation.schema.json --required --noExtraProps --topRef",
+        "generate-typecheck": "typescript-json-schema tsconfig.json * --out src/validation.schema.json --required --noExtraProps --topRef && node ./.scripts/generate-validation-enum.js",
         "start": "yarn run generate-typecheck && tsc && node dist/Startup.js",
         "prettier": "prettier --write \"{src,web,.scripts}/**/*.{js,jsx,ts,tsx}\" \"*.{js,json,md,yml,yaml}\""
     },
