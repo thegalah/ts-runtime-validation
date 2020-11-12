@@ -6,7 +6,7 @@ const validData = {
 
 const invalidData = {};
 
-const doSomethingWithUnkownData = (raw: unknown) => {
+const doSomethingWithUnknownData = (raw: unknown) => {
     if (validate(raw, "#/definitions/SimpleSchema")) {
         console.log(`Valid schema: ${raw.name}`);
     } else {
@@ -14,5 +14,5 @@ const doSomethingWithUnkownData = (raw: unknown) => {
     }
 };
 
-doSomethingWithUnkownData(validData);
-doSomethingWithUnkownData(invalidData);
+doSomethingWithUnknownData(validData);
+doSomethingWithUnknownData(invalidData);
