@@ -13,7 +13,7 @@
         "generate-typecheck": "typescript-json-schema tsconfig.json * --out src/validation.schema.json --required --noExtraProps --topRef && node ./.scripts/generate-validation-enum.js",
         "start": "yarn run generate-typecheck && tsc && node dist/Startup.js",
         "prettier": "prettier --write \"{src,web,.scripts}/**/*.{js,jsx,ts,tsx}\" \"*.{js,json,md,yml,yaml}\"",
-        "postinstall": "yarn run generate-typecheck"
+        "postinstall": "yarn run generate-typecheck && yarn run prettier"
     },
     "devDependencies": {
         "typescript-json-schema": "^0.43.0"
