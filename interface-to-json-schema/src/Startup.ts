@@ -1,5 +1,3 @@
-import { SimpleSchema } from "./Types/SimpleSchema";
-import { SchemaDefinition } from "./SchemaDefinition";
 import { validate } from "./validate";
 import "source-map-support/register";
 const validData = {
@@ -9,13 +7,10 @@ const validData = {
 const invalidData = {};
 
 const doSomethingWithUnkownData = (raw: unknown) => {
-    const result = validate<SimpleSchema>(raw, SchemaDefinition.SIMPLESCHEMA);
-    if (result.errors) {
-        console.log(`Invalid data received errors:`);
-        console.log(result.errors);
+    if (validate(raw, "#/definitions/SimpleSchema")) {
+        console.log(`Valid schema: ${raw.name}`);
     } else {
-        const validData = result.data;
-        console.log(`My name is: ${validData.name}`);
+        console.log(`Invalid data received errors:`);
     }
 };
 
