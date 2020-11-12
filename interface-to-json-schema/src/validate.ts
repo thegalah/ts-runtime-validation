@@ -7,6 +7,5 @@ validator.compile(schema);
 
 export const validate = <T extends keyof typeof schemas>(data: unknown, schemaKeyRef: T): data is ISchema[T] => {
     validator.validate(schemaKeyRef as string, data);
-    const errors = validator.errors;
-    return errors === undefined;
+    return Boolean(validator.errors) === false;
 };

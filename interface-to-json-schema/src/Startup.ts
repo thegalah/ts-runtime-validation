@@ -10,7 +10,7 @@ const doSomethingWithUnkownData = (raw: unknown) => {
     if (validate(raw, "#/definitions/SimpleSchema")) {
         console.log(`Valid schema: ${raw.name}`);
     } else {
-        console.log(`Invalid data received errors:`);
+        console.log(`Invalid data received errors`);
     }
 };
 
