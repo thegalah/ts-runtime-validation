@@ -9,7 +9,9 @@ program.argument("<string>", "glob");
 
 program.parse();
 
-const options = program.opts();
+program.action((glob) => {
+    console.log(`Searching for glob ${glob}`);
+});
 
 // // create the builder
 // const api = new fdir().withFullPaths().crawl("path/to/dir");
