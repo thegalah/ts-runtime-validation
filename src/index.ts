@@ -12,9 +12,8 @@ program.argument("output", "Validation schema output and validation path", ".ts-
 
 program.parse();
 
-const options = program.opts();
-
-console.log(options);
+const args = program.arguments;
+console.log(args);
 
 // // create the builder
 // const api = new fdir().withFullPaths().crawl("path/to/dir");
