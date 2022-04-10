@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-import { Command } from "commander";
+import { program } from "commander";
 
 // import { fdir } from "fdir";
 
-const program = new Command();
-program.requiredOption("-g, --glob <string>", "Glob must be provided");
+program.argument("glob", "Glob file path of typescript files to generate json schema validations for.");
+program.action((glob) => {
+    console.log(`provided glob: ${glob}`);
+});
 
 program.parse();
 
-program.action((glob) => {
-    console.log(`Searching for glob ${glob}`);
-});
+const options = program.opts();
 
 // // create the builder
 // const api = new fdir().withFullPaths().crawl("path/to/dir");
