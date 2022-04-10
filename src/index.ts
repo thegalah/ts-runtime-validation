@@ -9,7 +9,11 @@ export interface ICommandOptions {
     readonly output: string;
 }
 
-program.option("--glob", "Glob file path of typescript files to generate ts-interface -> json-schema validations for.", "*");
+program.option(
+    "--glob",
+    "Glob file path of typescript files to generate ts-interface -> json-schema validations for.",
+    "*.jsonschema.{ts,tsx}"
+);
 program.option("--rootPath", "RootPath to search", "./src");
 program.option("--output", "Validation schema + typescript interface output directory", "./.ts-runtime-check");
 
