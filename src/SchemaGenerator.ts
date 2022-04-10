@@ -19,7 +19,6 @@ export class SchemaGenerator {
                 },
             ],
         });
-        const files = await api.withPromise();
-        console.log(files);
+        return await api.withPromise();
     };
 }
