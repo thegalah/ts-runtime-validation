@@ -88,6 +88,6 @@ export class SchemaGenerator {
             fs.mkdirSync(dir, { recursive: true });
         }
 
-        fs.writeFileSync(`${dir}/validation.schema.json`, JSON.stringify(outputBuffer));
+        fs.writeFileSync(`${dir}/validation.schema.json`, JSON.stringify(outputBuffer, null, 4));
     };
 }
