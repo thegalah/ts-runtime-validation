@@ -35,7 +35,6 @@ export class SchemaGenerator {
             titles: true,
             aliasRef: true,
             ref: true,
-            uniqueNames: true,
             noExtraProps: true,
         };
 
@@ -49,9 +48,8 @@ export class SchemaGenerator {
         const userDefinedSymbols = generator.getMainFileSymbols(program);
         userDefinedSymbols.forEach((symbol) => {
             const schema = generator.getSchemaForSymbol(symbol);
-            const symbolWithoutHash = symbol.slice(0, -HASH_POSTFIX_LENGTH);
-            const definition = { [`${symbolWithoutHash}`]: schema };
-            console.log(definition);
+            const definition = { [`${symbol}`]: schema };
+            console.log(JSON.stringify(definition));
         });
     };
 }
