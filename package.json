@@ -1,10 +1,13 @@
 {
     "name": "@thegalah/ts-runtime-check",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "author": "Matthew Duong <thegalah@gmail.com>",
     "license": "MIT",
     "dependencies": {
         "typescript-json-schema": "^0.53.0"
+    },
+    "bin": {
+        "myapp": "dist/index.js"
     },
     "scripts": {
         "build": "tsc",
