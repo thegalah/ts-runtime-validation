@@ -10,8 +10,6 @@ program.action((glob, outputPath) => {
     console.log(`output path: ${outputPath}`);
 });
 
-program.parse(process.argv);
-
 // program.parse();
 
 // const args = program.arguments;
