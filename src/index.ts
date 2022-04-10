@@ -3,11 +3,13 @@ import { program } from "commander";
 
 // import { fdir } from "fdir";
 
-program.addArgument("<glob>", "Glob file path of typescript files to generate ts-interface -> json-schema validations for.", "*");
-program.addArgument("<outputPath>", "Validation schema output and validation path"), ".ts-runtime-check";
+program.option("--glob", "Glob file path of typescript files to generate ts-interface -> json-schema validations for.", "*");
+
+// program.addArgument("<glob>", "Glob file path of typescript files to generate ts-interface -> json-schema validations for.", "*");
+// program.addArgument("<outputPath>", "Validation schema output and validation path"), ".ts-runtime-check";
 program.action((glob, outputPath) => {
     console.log(`provided glob: ${glob}`);
-    console.log(`output path: ${outputPath}`);
+    // console.log(`output path: ${outputPath}`);
 });
 
 // program.parse();
