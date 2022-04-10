@@ -4,8 +4,7 @@ import { Command } from "commander";
 // import { fdir } from "fdir";
 
 const program = new Command();
-
-program.argument("[glob]", "Glob file path of typescript files to generate json schema validations for.");
+program.requiredOption("-g, --glob <string>", "Glob must be provided");
 
 program.parse();
 
