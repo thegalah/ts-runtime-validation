@@ -10,7 +10,7 @@ program.action((glob, outputPath) => {
     console.log(`output path: ${outputPath}`);
 });
 
-// program.parse();
+program.parse();
 
 // const args = program.arguments;
 // console.log(args);
