@@ -1,7 +1,7 @@
 {
     "name": "interface-to-json-schema",
-    "version": "1.0.0",
-    "author": "Matthew Duong <matt@timeweave.com.au>",
+    "version": "0.1.0",
+    "author": "Matthew Duong <thegalah@gmail.com>",
     "license": "MIT",
     "dependencies": {
         "typescript-json-schema": "^0.53.0"
