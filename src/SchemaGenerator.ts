@@ -4,6 +4,8 @@ import { resolve } from "path";
 import * as TJS from "typescript-json-schema";
 import picomatch from "picomatch";
 
+const HASH_POSTFIX_LENGTH = 9;
+
 export class SchemaGenerator {
     public constructor(private options: ICommandOptions) {
         this.generateJsonSchema();
@@ -30,6 +32,11 @@ export class SchemaGenerator {
         });
         const settings: TJS.PartialArgs = {
             required: true,
+            titles: true,
+            aliasRef: true,
+            ref: true,
+            uniqueNames: true,
+            noExtraProps: true,
         };
 
         const compilerOptions: TJS.CompilerOptions = {
@@ -41,8 +48,11 @@ export class SchemaGenerator {
         const generator = TJS.buildGenerator(program, settings);
         const userDefinedSymbols = generator.getMainFileSymbols(program);
         userDefinedSymbols.forEach((symbol) => {
+            console.log(symbol);
             const schema = generator.getSchemaForSymbol(symbol);
-            console.log(schema);
+            const symbolWithoutHash = symbol.slice(0, -HASH_POSTFIX_LENGTH);
+            const definition = { [`${symbolWithoutHash}`]: schema };
+            console.log(definition);
         });
     };
 }
