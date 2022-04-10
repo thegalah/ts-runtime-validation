@@ -1,10 +1,23 @@
 #!/usr/bin/env node
-import { program } from "commander";
+import { Command } from "commander";
 
-program.option("--first").option("-s, --separator <char>");
+// import { fdir } from "fdir";
+
+const program = new Command();
+
+program.argument("<string>", "glob");
 
 program.parse();
 
 const options = program.opts();
-const limit = options.first ? 1 : undefined;
-console.log(program.args[0].split(options.separator, limit));
+
+// // create the builder
+// const api = new fdir().withFullPaths().crawl("path/to/dir");
+
+// // get all files in a directory synchronously
+// const files = api.sync();
+
+// // or asynchronously
+// api.withPromise().then((files) => {
+//     // do something with the result here.
+// });
