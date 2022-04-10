@@ -2,7 +2,9 @@ import { fdir } from "fdir";
 import { ICommandOptions } from "./index";
 import { resolve } from "path";
 import * as TJS from "typescript-json-schema";
+import fs from "fs";
 import picomatch from "picomatch";
+import path from "path";
 
 export class SchemaGenerator {
     public constructor(private options: ICommandOptions) {
@@ -70,6 +72,7 @@ export class SchemaGenerator {
     };
 
     private writeSchemaMapToOutput = (schemaMap: Map<string, TJS.Definition>) => {
+        const { output, rootPath } = this.options;
         const definitions: { [id: string]: TJS.Definition } = {};
         schemaMap.forEach((schema, key) => {
             definitions[key] = schema;
@@ -78,6 +81,13 @@ export class SchemaGenerator {
             $schema: this.getSchemaVersion(schemaMap),
             definitions,
         };
-        console.log(outputBuffer);
+
+        const dir = path.join(rootPath, output);
+
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+
+        fs.writeFileSync(`${dir}/validation.schema.json`, JSON.stringify(outputBuffer));
     };
 }
