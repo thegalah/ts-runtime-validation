@@ -7,8 +7,7 @@
         "typescript-json-schema": "^0.53.0"
     },
     "scripts": {
-        "generate-typecheck": "typescript-json-schema tsconfig.json * --out src/validation.schema.json --required --noExtraProps --topRef && node ./.scripts/generate-validation-enum.js",
-        "start": "yarn run generate-typecheck && tsc && node dist/Startup.js",
+        "build": "tsc",
         "prettier": "prettier --write \"{src,web,.scripts}/**/*.{js,jsx,ts,tsx}\" \"*.{js,json,md,yml,yaml}\""
     },
     "devDependencies": {
