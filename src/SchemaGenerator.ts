@@ -6,8 +6,13 @@ import picomatch from "picomatch";
 
 export class SchemaGenerator {
     public constructor(private options: ICommandOptions) {
-        this.generateJsonSchema();
+        this.generateOutput();
     }
+
+    private generateOutput = async () => {
+        const map = await this.getJsonSchemaMap();
+        this.writeSchemaMapToOutput(map);
+    };
 
     private getMatchingFiles = async () => {
         const { glob, rootPath } = this.options;
@@ -23,7 +28,7 @@ export class SchemaGenerator {
         return (await api.withPromise()) as Array<string>;
     };
 
-    private generateJsonSchema = async () => {
+    private getJsonSchemaMap = async () => {
         const schemaMap = new Map<string, TJS.Definition>();
         const filesList = await this.getMatchingFiles();
         const files = filesList.map((fileName) => {
@@ -45,13 +50,34 @@ export class SchemaGenerator {
         const program = TJS.getProgramFromFiles(files, compilerOptions);
 
         const generator = TJS.buildGenerator(program, settings);
-        const userDefinedSymbols = generator.getMainFileSymbols(program);
+        const userDefinedSymbols = generator?.getMainFileSymbols(program) ?? [];
         userDefinedSymbols.forEach((symbol) => {
             if (schemaMap.has(symbol)) {
                 throw new Error(`Duplicate symbol "${symbol}" found.`);
             }
-            const schema = generator.getSchemaForSymbol(symbol);
-            schemaMap.set(symbol, schema);
+            const schema = generator?.getSchemaForSymbol(symbol);
+            if (schema) {
+                schemaMap.set(symbol, schema);
+            }
         });
+
+        return schemaMap;
+    };
+
+    private getSchemaVersion = (schemaMap: Map<string, TJS.Definition>) => {
+        const firstEntry = schemaMap.values().next().value;
+        return firstEntry["$schema"] ?? "";
+    };
+
+    private writeSchemaMapToOutput = (schemaMap: Map<string, TJS.Definition>) => {
+        const definitions: { [id: string]: TJS.Definition } = {};
+        schemaMap.forEach((schema, key) => {
+            definitions[key] = schema;
+        });
+        const outputBuffer: TJS.Definition = {
+            $schema: this.getSchemaVersion(schemaMap),
+            definitions,
+        };
+        console.log(outputBuffer);
     };
 }
