@@ -5,7 +5,7 @@ import { Command } from "commander";
 
 const program = new Command();
 
-program.argument("<string>", "glob");
+program.argument("[glob]", "Glob file path of typescript files to generate json schema validations for.");
 
 program.parse();
 
