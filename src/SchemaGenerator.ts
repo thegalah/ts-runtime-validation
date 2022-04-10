@@ -48,7 +48,6 @@ export class SchemaGenerator {
         const generator = TJS.buildGenerator(program, settings);
         const userDefinedSymbols = generator.getMainFileSymbols(program);
         userDefinedSymbols.forEach((symbol) => {
-            console.log(symbol);
             const schema = generator.getSchemaForSymbol(symbol);
             const symbolWithoutHash = symbol.slice(0, -HASH_POSTFIX_LENGTH);
             const definition = { [`${symbolWithoutHash}`]: schema };
