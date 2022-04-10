@@ -13,7 +13,7 @@ export class SchemaGenerator {
 
     private generateOutput = async () => {
         const map = await this.getJsonSchemaMap();
-        this.writeSchemaMapToOutput(map);
+        this.writeSchemaMapToValidationSchema(map);
     };
 
     private getMatchingFiles = async () => {
@@ -71,7 +71,7 @@ export class SchemaGenerator {
         return firstEntry["$schema"] ?? "";
     };
 
-    private writeSchemaMapToOutput = (schemaMap: Map<string, TJS.Definition>) => {
+    private writeSchemaMapToValidationSchema = (schemaMap: Map<string, TJS.Definition>) => {
         const { output, rootPath } = this.options;
         const definitions: { [id: string]: TJS.Definition } = {};
         schemaMap.forEach((schema, key) => {
@@ -90,4 +90,6 @@ export class SchemaGenerator {
 
         fs.writeFileSync(`${dir}/validation.schema.json`, JSON.stringify(outputBuffer, null, 4));
     };
+
+    private writeSchemaMapToValidationTypes = (schemaMap: Map<string, TJS.Definition>) => {};
 }
