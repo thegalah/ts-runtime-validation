@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+
+import { SchemaGenerator } from "./SchemaGenerator";
 import { program } from "commander";
 
 export interface ICommandOptions {
@@ -12,4 +14,4 @@ program.option("--output", "Validation schema + typescript interface output dire
 program.parse();
 
 const options = program.opts<ICommandOptions>();
-console.log(options);
+new SchemaGenerator(options);
