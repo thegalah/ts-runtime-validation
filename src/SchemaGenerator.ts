@@ -4,8 +4,6 @@ import { resolve } from "path";
 import * as TJS from "typescript-json-schema";
 import picomatch from "picomatch";
 
-const HASH_POSTFIX_LENGTH = 9;
-
 export class SchemaGenerator {
     public constructor(private options: ICommandOptions) {
         this.generateJsonSchema();
@@ -26,6 +24,7 @@ export class SchemaGenerator {
     };
 
     private generateJsonSchema = async () => {
+        const schemaMap = new Map<string, TJS.Definition>();
         const filesList = await this.getMatchingFiles();
         const files = filesList.map((fileName) => {
             return resolve(fileName);
@@ -36,6 +35,7 @@ export class SchemaGenerator {
             aliasRef: true,
             ref: true,
             noExtraProps: true,
+            propOrder: true,
         };
 
         const compilerOptions: TJS.CompilerOptions = {
@@ -47,9 +47,11 @@ export class SchemaGenerator {
         const generator = TJS.buildGenerator(program, settings);
         const userDefinedSymbols = generator.getMainFileSymbols(program);
         userDefinedSymbols.forEach((symbol) => {
+            if (schemaMap.has(symbol)) {
+                throw new Error(`Duplicate symbol "${symbol}" found.`);
+            }
             const schema = generator.getSchemaForSymbol(symbol);
-            const definition = { [`${symbol}`]: schema };
-            console.log(JSON.stringify(definition));
+            schemaMap.set(symbol, schema);
         });
     };
 }
