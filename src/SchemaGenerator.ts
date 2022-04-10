@@ -10,8 +10,8 @@ export class SchemaGenerator {
 
     private getMatchingFiles = async () => {
         console.log(this.options);
-        const { glob } = this.options;
-        const api = new fdir().withFullPaths().crawl(glob);
+        const { glob, rootPath } = this.options;
+        const api = new fdir().glob(glob).crawl(rootPath);
         const files = await api.withPromise();
         console.log(files);
     };
