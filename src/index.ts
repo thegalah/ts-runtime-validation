@@ -15,7 +15,7 @@ program.option(
     "*.jsonschema.{ts,tsx}"
 );
 program.option("--rootPath", "RootPath to search", "./src");
-program.option("--output", "Validation schema + typescript interface output directory", "./.ts-runtime-check");
+program.option("--output", "Validation schema + typescript interface output directory (relative to root path)", "./.ts-runtime-check");
 
 program.parse();
 
