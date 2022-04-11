@@ -12,8 +12,10 @@ export class SchemaGenerator {
     }
 
     private generateOutput = async () => {
-        const map = await this.getJsonSchemaMap();
+        const filesList = await this.getMatchingFiles();
+        const map = await this.getJsonSchemaMap(filesList);
         this.writeSchemaMapToValidationSchema(map);
+        this.writeSchemaMapToValidationTypes(map);
     };
 
     private getMatchingFiles = async () => {
@@ -30,9 +32,8 @@ export class SchemaGenerator {
         return (await api.withPromise()) as Array<string>;
     };
 
-    private getJsonSchemaMap = async () => {
+    private getJsonSchemaMap = async (filesList: Array<string>) => {
         const schemaMap = new Map<string, TJS.Definition>();
-        const filesList = await this.getMatchingFiles();
         const files = filesList.map((fileName) => {
             return resolve(fileName);
         });
@@ -119,11 +120,12 @@ export class SchemaGenerator {
         outputBuffer.push("");
 
         const output = outputBuffer.join("\n");
+        console.log(output);
 
-        fs.writeFile(OUTPUT_FILE, output, { flag: "w" }, function (err) {
-            if (err) {
-                return console.log(err);
-            }
-        });
+        // fs.writeFile(OUTPUT_FILE, output, { flag: "w" }, function (err) {
+        //     if (err) {
+        //         return console.log(err);
+        //     }
+        // });
     };
 }
