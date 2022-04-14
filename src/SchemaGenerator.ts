@@ -53,6 +53,7 @@ export class SchemaGenerator {
         this.writeSchemaMapToValidationSchema(map);
         if (helpers === false) {
             console.log("Skipping helper file generation");
+            return;
         }
         await this.writeSchemaMapToValidationTypes(map, fileList);
         this.writeValidatorFunction();

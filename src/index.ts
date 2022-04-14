@@ -3,6 +3,8 @@
 import { SchemaGenerator } from "./SchemaGenerator";
 import { program } from "commander";
 
+const defaultGlobPattern = "*.jsonschema.{ts,tsx}";
+
 const defaultRootPath = "./src";
 const defaultOutputFolder = "./.ts-runtime-check";
 
@@ -15,8 +17,8 @@ export interface ICommandOptions {
 
 program.option(
     "--glob",
-    "Glob file path of typescript files to generate ts-interface -> json-schema validations for.",
-    "*.jsonschema.{ts,tsx}"
+    `Glob file path of typescript files to generate ts-interface -> json-schema validations - default: ${defaultGlobPattern}`,
+    defaultGlobPattern
 );
 program.option("--rootPath", `RootPath of source - default: ${defaultRootPath}`, defaultRootPath);
 program.option(
