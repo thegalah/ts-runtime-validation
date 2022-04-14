@@ -1,5 +1,5 @@
 {
-    "name": "ts-runtime-check",
+    "name": "ts-runtime-validation",
     "version": "1.0.1",
     "author": "Matthew Duong <thegalah@gmail.com>",
     "license": "MIT",
