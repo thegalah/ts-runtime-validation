@@ -185,6 +185,20 @@ export class SchemaGenerator {
             namedImports: ["ISchema", "schemas"],
             moduleSpecifier: `./${path.parse(schemaDefinitionFileName).name}`,
         });
+
+        sourceFile.addVariableStatement({
+            declarationKind: VariableDeclarationKind.Const,
+            declarations: [
+                {
+                    name: "validator",
+                    initializer: (writer: CodeBlockWriter) => {
+                        writer.writeLine(`new Ajv({ allErrors: true });`);
+                        writer.writeLine(`validator.compile(schema)`);
+                    },
+                },
+            ],
+        });
+
         sourceFile.addVariableStatement({
             declarationKind: VariableDeclarationKind.Const,
             declarations: [
@@ -201,7 +215,7 @@ export class SchemaGenerator {
         });
 
         sourceFile.addExportDeclaration({
-            namedExports: ["isValidSchema"],
+            namedExports: ["validator", "isValidSchema"],
         });
         await project.save();
     };
