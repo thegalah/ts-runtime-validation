@@ -25,6 +25,14 @@ Options:
   -h, --help    display help for command
 ```
 
+## Usage with helper function
+
+```typescript
+if (isValidSchema(data, "#/definitions/ITypeA")) {
+    // variable: data in this block will have typings for ITypeA
+}
+```
+
 ## Contributing
 
 Submit a PR
