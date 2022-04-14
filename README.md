@@ -14,6 +14,8 @@ The helper file assumes you have [ajv-validator](https://github.com/ajv-validato
 
 ## CLI usage
 
+Ensure your project files containing the schemas you want to validate end with the prefix `.jsonschema.ts`
+
 ```
 Usage: ts-runtime-check [options]
 
