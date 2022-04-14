@@ -109,7 +109,7 @@ export class SchemaGenerator {
             },
         });
 
-        const symbols = Object.keys(Array.from(schemaMap.keys())).filter((symbol) => {
+        const symbols = Array.from(schemaMap.keys()).filter((symbol) => {
             return symbol !== "ISchema" && symbol !== "Schemas";
         });
 
@@ -120,7 +120,7 @@ export class SchemaGenerator {
                     name: "ISchema",
                     isExported: true,
                     properties: symbols.map((symbol) => {
-                        return { name: symbol, type: "string" };
+                        return { name: `#/definitions/${symbol}`, type: symbol };
                     }),
                 },
             ],
