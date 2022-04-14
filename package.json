@@ -1,5 +1,40 @@
 {
-  "dependencies": {
-    "ajv": "^6.12.6"
-  }
+    "name": "ts-runtime-validation",
+    "version": "1.0.1",
+    "author": "Matthew Duong <thegalah@gmail.com>",
+    "license": "MIT",
+    "dependencies": {
+        "commander": "^9.1.0",
+        "fdir": "^5.2.0",
+        "picomatch": "^2.3.1",
+        "ts-morph": "^14.0.0",
+        "typescript-json-schema": "^0.53.0"
+    },
+    "bin": {
+        "ts-runtime-check": "dist/index.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "prettier": "prettier --write \"{src,web,.scripts}/**/*.{js,jsx,ts,tsx}\" \"*.{js,json,md,yml,yaml}\""
+    },
+    "devDependencies": {
+        "@types/node": "^17.0.24",
+        "@types/picomatch": "^2.3.0",
+        "prettier": "^2.6.2",
+        "ts-node": "^10.7.0",
+        "typescript": "^4.6.3"
+    },
+    "description": "A set of tools to generate json-schema validations from typescript interface(s) and methods to validate unknown data at runtime against them",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thegalah/ts-runtime-check.git"
+    },
+    "bugs": {
+        "url": "https://github.com/thegalah/ts-runtime-check/issues"
+    },
+    "homepage": "https://github.com/thegalah/ts-runtime-check#readme",
+    "peerDependencies": {
+        "ajv": "^8.11.0"
+    }
 }
