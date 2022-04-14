@@ -25,10 +25,10 @@ export class SchemaGenerator {
     }
 
     private generateOutput = async () => {
-        const filesList = await this.getMatchingFiles();
-        const map = await this.getJsonSchemaMap(filesList);
+        const fileList = await this.getMatchingFiles();
+        const map = await this.getJsonSchemaMap(fileList);
         this.writeSchemaMapToValidationSchema(map);
-        await this.writeSchemaMapToValidationTypes(map);
+        await this.writeSchemaMapToValidationTypes(map, fileList);
     };
 
     private getMatchingFiles = async () => {
@@ -92,7 +92,6 @@ export class SchemaGenerator {
     };
 
     private writeSchemaMapToValidationSchema = (schemaMap: Map<string, TJS.Definition>) => {
-        const { output, rootPath } = this.options;
         const definitions: { [id: string]: TJS.Definition } = {};
         schemaMap.forEach((schema, key) => {
             definitions[key] = schema;
@@ -106,8 +105,7 @@ export class SchemaGenerator {
         fs.writeFileSync(this.jsonSchemaOutputFile, JSON.stringify(outputBuffer, null, 4));
     };
 
-    private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, TJS.Definition>) => {
-        const outputFolder = `${this.options.rootPath}/${this.options.output}/`;
+    private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, TJS.Definition>, fileList: Array<string>) => {
         const project = new Project({
             manipulationSettings: {
                 indentationText: IndentationText.FourSpaces,
@@ -125,9 +123,9 @@ export class SchemaGenerator {
         const sourceFile = project.createSourceFile(this.tsSchemaDefinitionOutputFile);
 
         sourceFile.addImportDeclarations(
-            symbols.map((symbol) => {
-                const filePath = "./file";
-                return { namespaceImport: symbol, moduleSpecifier: filePath };
+            fileList.map((file) => {
+                const filePath = path.relative(this.outputPath, file);
+                return { defaultImport: "*", moduleSpecifier: filePath };
             })
         );
 
