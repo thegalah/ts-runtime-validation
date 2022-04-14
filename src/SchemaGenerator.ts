@@ -7,19 +7,33 @@ import picomatch from "picomatch";
 import path from "path";
 import { Project, IndentationText, NewLineKind, QuoteKind, StructureKind, VariableDeclarationKind, CodeBlockWriter } from "ts-morph";
 
+const defaultProjectSettings = {
+    manipulationSettings: {
+        indentationText: IndentationText.FourSpaces,
+        newLineKind: NewLineKind.LineFeed,
+        quoteKind: QuoteKind.Double,
+        usePrefixAndSuffixTextForRename: false,
+        useTrailingCommas: true,
+    },
+};
+
 export class SchemaGenerator {
     private outputPath = path.join(this.options.rootPath, this.options.output);
     private jsonSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "validation.schema.json");
     private tsSchemaDefinitionOutputFile = path.join(this.options.rootPath, this.options.output, "SchemaDefinition.ts");
+    private isValidSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "isSchemaValid.ts");
+
     public constructor(private options: ICommandOptions) {
         this.generateOutput();
     }
 
     private generateOutput = async () => {
         const fileList = await this.getMatchingFiles();
+        console.log(`Parsing ${fileList.length} files`);
         const map = await this.getJsonSchemaMap(fileList);
         this.writeSchemaMapToValidationSchema(map);
         await this.writeSchemaMapToValidationTypes(map, fileList);
+        this.writeValidatorFunction();
     };
 
     private getMatchingFiles = async () => {
@@ -33,7 +47,7 @@ export class SchemaGenerator {
                 },
             ],
         });
-        return (await api.withPromise()) as Array<string>;
+        return api.withPromise() as Promise<Array<string>>;
     };
 
     private getJsonSchemaMap = async (filesList: Array<string>) => {
@@ -97,15 +111,7 @@ export class SchemaGenerator {
     };
 
     private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, TJS.Definition>, fileList: Array<string>) => {
-        const project = new Project({
-            manipulationSettings: {
-                indentationText: IndentationText.FourSpaces,
-                newLineKind: NewLineKind.LineFeed,
-                quoteKind: QuoteKind.Double,
-                usePrefixAndSuffixTextForRename: false,
-                useTrailingCommas: true,
-            },
-        });
+        const project = new Project(defaultProjectSettings);
 
         const symbols = Array.from(schemaMap.keys()).filter((symbol) => {
             return symbol !== "ISchema" && symbol !== "Schemas";
@@ -160,6 +166,12 @@ export class SchemaGenerator {
             }),
         });
 
+        await project.save();
+    };
+
+    private writeValidatorFunction = async () => {
+        const project = new Project(defaultProjectSettings);
+        const sourceFile = project.addSourceFileAtPath(this.isValidSchemaOutputFile);
         await project.save();
     };
 }
