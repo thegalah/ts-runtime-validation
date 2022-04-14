@@ -7,13 +7,13 @@ import picomatch from "picomatch";
 import path from "path";
 import {
     Project,
-    InterfaceDeclaration,
     IndentationText,
     NewLineKind,
     QuoteKind,
     StructureKind,
     VariableDeclarationKind,
     CodeBlockWriter,
+    ImportDeclaration,
 } from "ts-morph";
 
 export class SchemaGenerator {
@@ -120,14 +120,28 @@ export class SchemaGenerator {
             return symbol !== "ISchema" && symbol !== "Schemas";
         });
 
-        const sourceFile = project.createSourceFile(this.tsSchemaDefinitionOutputFile);
+        const readerProject = new Project();
+        readerProject.addSourceFilesAtPaths(fileList);
 
-        sourceFile.addImportDeclarations(
-            fileList.map((file) => {
-                const filePath = path.relative(this.outputPath, file);
-                return { defaultImport: "*", moduleSpecifier: filePath };
-            })
-        );
+        const importMap = new Map<string, Array<string>>();
+        fileList.forEach((file) => {
+            const dir = path.dirname(file);
+            const fileWithoutExtension = path.parse(file).name;
+            const relativeFilePath = path.relative(this.outputPath, dir);
+            const importPath = `${relativeFilePath}/${fileWithoutExtension}`;
+            const source = readerProject.getSourceFile(file);
+            source?.getInterfaces().forEach((interfaceDeclaration) => {
+                const structure = interfaceDeclaration.getStructure();
+                const namedImports = importMap.get(importPath) ?? [];
+                namedImports.push(structure.name);
+                importMap.set(importPath, namedImports);
+            });
+        });
+
+        const sourceFile = project.createSourceFile(this.tsSchemaDefinitionOutputFile);
+        importMap.forEach((namedImports, importPath) => {
+            sourceFile.addImportDeclaration({ namedImports, moduleSpecifier: importPath });
+        });
 
         sourceFile.addVariableStatement({
             declarationKind: VariableDeclarationKind.Const,
