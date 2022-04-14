@@ -1,6 +1,6 @@
 {
     "name": "ts-runtime-check",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "author": "Matthew Duong <thegalah@gmail.com>",
     "license": "MIT",
     "dependencies": {
