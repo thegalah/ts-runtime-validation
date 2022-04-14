@@ -126,7 +126,8 @@ export class SchemaGenerator {
 
         sourceFile.addImportDeclarations(
             symbols.map((symbol) => {
-                return { namespaceImport: symbol, moduleSpecifier: "./file" };
+                const filePath = "./file";
+                return { namespaceImport: symbol, moduleSpecifier: filePath };
             })
         );
 
