@@ -6,7 +6,11 @@ Get bulletproof type validation based off typescript interfaces
 
 ## How?
 
-This is a code generator that by default scans your source directory for files ending in the provided glob pattern. By default: `*.jsonschema.{ts,tsx}`.
+This is a code generator that is designed to run as a yarn / npm script. By default scans your source directory for files ending in the provided glob pattern. By default: `*.jsonschema.{ts,tsx}`.
+
+## Footnote
+
+The helper file assumes you have [ajv-validator](https://github.com/ajv-validator/ajv) peer dependency installed.
 
 ## CLI usage
 
@@ -20,3 +24,11 @@ Options:
   --no-helpers  Only generate JSON schema without typescript helper files
   -h, --help    display help for command
 ```
+
+## Contributing
+
+Submit a PR
+
+## License
+
+MIT
