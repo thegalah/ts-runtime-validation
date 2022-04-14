@@ -113,17 +113,14 @@ export class SchemaGenerator {
             return symbol !== "ISchema" && symbol !== "Schemas";
         });
 
-        project.createSourceFile(this.tsSchemaDefinitionOutputFile, {
-            statements: [
-                {
-                    kind: StructureKind.Interface,
-                    name: "ISchema",
-                    isExported: true,
-                    properties: symbols.map((symbol) => {
-                        return { name: `#/definitions/${symbol}`, type: symbol };
-                    }),
-                },
-            ],
+        const sourceFile = project.createSourceFile(this.tsSchemaDefinitionOutputFile);
+        sourceFile.addInterface({
+            kind: StructureKind.Interface,
+            name: "ISchema",
+            isExported: true,
+            properties: symbols.map((symbol) => {
+                return { name: `["#/definitions/${symbol}"]`, type: symbol };
+            }),
         });
 
         await project.save();
