@@ -5,9 +5,19 @@ import * as TJS from "typescript-json-schema";
 import fs from "fs";
 import picomatch from "picomatch";
 import path from "path";
-import { Project, IndentationText, NewLineKind, QuoteKind, StructureKind, VariableDeclarationKind, CodeBlockWriter } from "ts-morph";
+import {
+    Project,
+    IndentationText,
+    NewLineKind,
+    QuoteKind,
+    StructureKind,
+    VariableDeclarationKind,
+    CodeBlockWriter,
+    ProjectOptions,
+    SourceFileCreateOptions,
+} from "ts-morph";
 
-const defaultProjectSettings = {
+const defaultProjectSettings: ProjectOptions = {
     manipulationSettings: {
         indentationText: IndentationText.FourSpaces,
         newLineKind: NewLineKind.LineFeed,
@@ -15,6 +25,10 @@ const defaultProjectSettings = {
         usePrefixAndSuffixTextForRename: false,
         useTrailingCommas: true,
     },
+};
+
+const defaultCreateFileOptions: SourceFileCreateOptions = {
+    overwrite: true,
 };
 
 const validationSchemaFileName = "validation.schema.json";
@@ -31,10 +45,15 @@ export class SchemaGenerator {
     }
 
     private generateOutput = async () => {
+        const { helpers } = this.options;
         const fileList = await this.getMatchingFiles();
-        console.log(`Parsing ${fileList.length} files`);
+        console.log(`Found ${fileList.length} schema file(s)`);
         const map = await this.getJsonSchemaMap(fileList);
+        console.log(`Generating ${map.size} validation schema(s)`);
         this.writeSchemaMapToValidationSchema(map);
+        if (helpers === false) {
+            console.log("Skipping helper file generation");
+        }
         await this.writeSchemaMapToValidationTypes(map, fileList);
         this.writeValidatorFunction();
     };
@@ -138,7 +157,7 @@ export class SchemaGenerator {
             });
         });
 
-        const sourceFile = project.createSourceFile(this.tsSchemaDefinitionOutputFile);
+        const sourceFile = project.createSourceFile(this.tsSchemaDefinitionOutputFile, {}, defaultCreateFileOptions);
         importMap.forEach((namedImports, importPath) => {
             sourceFile.addImportDeclaration({ namedImports, moduleSpecifier: importPath });
         });
@@ -178,7 +197,7 @@ export class SchemaGenerator {
 
     private writeValidatorFunction = async () => {
         const project = new Project(defaultProjectSettings);
-        const sourceFile = project.createSourceFile(this.isValidSchemaOutputFile);
+        const sourceFile = project.createSourceFile(this.isValidSchemaOutputFile, {}, defaultCreateFileOptions);
         sourceFile.addImportDeclaration({ namespaceImport: "schema", moduleSpecifier: `./${validationSchemaFileName}` });
         sourceFile.addImportDeclaration({ defaultImport: "Ajv", moduleSpecifier: "ajv" });
         sourceFile.addImportDeclaration({

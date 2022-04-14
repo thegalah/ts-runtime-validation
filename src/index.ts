@@ -10,6 +10,7 @@ export interface ICommandOptions {
     readonly glob: string;
     readonly rootPath: string;
     readonly output: string;
+    readonly helpers: boolean;
 }
 
 program.option(
@@ -23,8 +24,10 @@ program.option(
     `Validation schema + typescript interface output directory (relative to root path) - default: ${defaultOutputFolder}`,
     defaultOutputFolder
 );
+program.option("--no-helpers", "Only generate JSON schema without typescript helper files", true);
 
 program.parse();
 
 const options = program.opts<ICommandOptions>();
+
 new SchemaGenerator(options);
