@@ -171,7 +171,7 @@ export class SchemaGenerator {
 
     private writeValidatorFunction = async () => {
         const project = new Project(defaultProjectSettings);
-        const sourceFile = project.addSourceFileAtPath(this.isValidSchemaOutputFile);
+        const sourceFile = project.createSourceFile(this.isValidSchemaOutputFile);
         sourceFile.addVariableStatement({
             declarationKind: VariableDeclarationKind.Const,
             declarations: [
