@@ -4,7 +4,7 @@ import { SchemaGenerator } from "./SchemaGenerator";
 import { program } from "commander";
 
 const defaultRootPath = "./src";
-const defaultOutputFolder = "./ts-runtime-check";
+const defaultOutputFolder = "./.ts-runtime-check";
 
 export interface ICommandOptions {
     readonly glob: string;

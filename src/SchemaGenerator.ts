@@ -17,10 +17,13 @@ const defaultProjectSettings = {
     },
 };
 
+const validationSchemaFileName = "validation.schema.json";
+const schemaDefinitionFileName = "SchemaDefinition.ts";
+
 export class SchemaGenerator {
     private outputPath = path.join(this.options.rootPath, this.options.output);
-    private jsonSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "validation.schema.json");
-    private tsSchemaDefinitionOutputFile = path.join(this.options.rootPath, this.options.output, "SchemaDefinition.ts");
+    private jsonSchemaOutputFile = path.join(this.options.rootPath, this.options.output, validationSchemaFileName);
+    private tsSchemaDefinitionOutputFile = path.join(this.options.rootPath, this.options.output, schemaDefinitionFileName);
     private isValidSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "isSchemaValid.ts");
 
     public constructor(private options: ICommandOptions) {
@@ -160,10 +163,14 @@ export class SchemaGenerator {
         sourceFile.addInterface({
             kind: StructureKind.Interface,
             name: "ISchema",
-            isExported: true,
+            isExported: false,
             properties: symbols.map((symbol) => {
                 return { name: `readonly ["#/definitions/${symbol}"]`, type: symbol };
             }),
+        });
+
+        sourceFile.addExportDeclaration({
+            namedExports: ["schemas", "ISchema"],
         });
 
         await project.save();
@@ -172,6 +179,12 @@ export class SchemaGenerator {
     private writeValidatorFunction = async () => {
         const project = new Project(defaultProjectSettings);
         const sourceFile = project.createSourceFile(this.isValidSchemaOutputFile);
+        sourceFile.addImportDeclaration({ namespaceImport: "schema", moduleSpecifier: `./${validationSchemaFileName}` });
+        sourceFile.addImportDeclaration({ defaultImport: "Ajv", moduleSpecifier: "ajv" });
+        sourceFile.addImportDeclaration({
+            namedImports: ["ISchema", "schemas"],
+            moduleSpecifier: `./${path.parse(schemaDefinitionFileName).name}`,
+        });
         sourceFile.addVariableStatement({
             declarationKind: VariableDeclarationKind.Const,
             declarations: [
@@ -185,6 +198,10 @@ export class SchemaGenerator {
                     },
                 },
             ],
+        });
+
+        sourceFile.addExportDeclaration({
+            namedExports: ["isValidSchema"],
         });
         await project.save();
     };
