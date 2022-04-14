@@ -10,7 +10,7 @@ This is a code generator that is designed to run as a yarn / npm script. By defa
 
 ## Footnote
 
-The helper file assumes you have [ajv-validator](https://github.com/ajv-validator/ajv) peer dependency installed.
+The helper file assumes you have [ajv-validator](https://github.com/ajv-validator/ajv) peer dependency installed. Since this is only a code generation tool this package can be installed as a dev dependency.
 
 ## CLI usage
 
