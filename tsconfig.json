@@ -9,7 +9,8 @@
         "lib": ["es6", "dom"],
         "esModuleInterop": true,
         "strict": true,
-        "noImplicitAny": true
+        "noImplicitAny": true,
+        "noUnusedParameters": true
     },
     "include": ["src/**/*.ts"],
     "exclude": ["node_modules"]

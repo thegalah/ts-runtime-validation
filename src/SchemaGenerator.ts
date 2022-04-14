@@ -5,16 +5,7 @@ import * as TJS from "typescript-json-schema";
 import fs from "fs";
 import picomatch from "picomatch";
 import path from "path";
-import {
-    Project,
-    IndentationText,
-    NewLineKind,
-    QuoteKind,
-    StructureKind,
-    VariableDeclarationKind,
-    CodeBlockWriter,
-    ImportDeclaration,
-} from "ts-morph";
+import { Project, IndentationText, NewLineKind, QuoteKind, StructureKind, VariableDeclarationKind, CodeBlockWriter } from "ts-morph";
 
 export class SchemaGenerator {
     private outputPath = path.join(this.options.rootPath, this.options.output);
