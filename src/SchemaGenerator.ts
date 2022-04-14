@@ -124,6 +124,12 @@ export class SchemaGenerator {
 
         const sourceFile = project.createSourceFile(this.tsSchemaDefinitionOutputFile);
 
+        sourceFile.addImportDeclarations(
+            symbols.map((symbol) => {
+                return { namespaceImport: symbol, moduleSpecifier: "./file" };
+            })
+        );
+
         sourceFile.addVariableStatement({
             declarationKind: VariableDeclarationKind.Const,
             declarations: [
