@@ -172,6 +172,20 @@ export class SchemaGenerator {
     private writeValidatorFunction = async () => {
         const project = new Project(defaultProjectSettings);
         const sourceFile = project.addSourceFileAtPath(this.isValidSchemaOutputFile);
+        sourceFile.addVariableStatement({
+            declarationKind: VariableDeclarationKind.Const,
+            declarations: [
+                {
+                    name: "isValidSchema",
+                    initializer: (writer: CodeBlockWriter) => {
+                        writer.writeLine(`<T extends keyof typeof schemas>(data: unknown, schemaKeyRef: T): data is ISchema[T] => {`);
+                        writer.writeLine(`validator.validate(schemaKeyRef as string, data);`);
+                        writer.writeLine(`return Boolean(validator.errors) === false;`);
+                        writer.writeLine(`}`);
+                    },
+                },
+            ],
+        });
         await project.save();
     };
 }
