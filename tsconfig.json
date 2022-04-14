@@ -8,7 +8,8 @@
         "resolveJsonModule": true,
         "lib": ["es6", "dom"],
         "esModuleInterop": true,
-        "strict": true
+        "strict": true,
+        "noImplicitAny": true
     },
     "include": ["src/**/*.ts"],
     "exclude": ["node_modules"]
