@@ -6,7 +6,11 @@ Get bulletproof type validation based off typescript interfaces without any extr
 
 ## How?
 
-This is a code generator that is designed to run as a yarn / npm script. By default scans your source directory for files ending in the provided glob pattern. By default: `*.jsonschema.{ts,tsx}`.
+This is a code generator that is designed to run as a yarn / npm script. By default scans your source directory for files ending in the provided glob pattern. By default: `*.jsonschema.{ts,tsx}`. The output will create three files:
+
+1. `./src/ts-runtime-validation/validation.schema.json` - containing the [jsonschema](http://json-schema.org/) types
+1. `./src/SchemaDefinition.ts` - containing the typescript.
+1. `./src/isSchemaValid.ts` - containing a type guard type inferring helper method (intended for consumption in your code base - examples below)
 
 ## Footnote
 

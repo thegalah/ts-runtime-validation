@@ -40,11 +40,9 @@ export class SchemaGenerator {
     private tsSchemaDefinitionOutputFile = path.join(this.options.rootPath, this.options.output, schemaDefinitionFileName);
     private isValidSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "isSchemaValid.ts");
 
-    public constructor(private options: ICommandOptions) {
-        this.generateOutput();
-    }
+    public constructor(private options: ICommandOptions) {}
 
-    private generateOutput = async () => {
+    public Generate = async () => {
         const { helpers } = this.options;
         const fileList = await this.getMatchingFiles();
         console.log(`Found ${fileList.length} schema file(s)`);
