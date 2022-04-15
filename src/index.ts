@@ -6,7 +6,7 @@ import { program } from "commander";
 const defaultGlobPattern = "*.jsonschema.{ts,tsx}";
 
 const defaultRootPath = "./src";
-const defaultOutputFolder = "./.ts-runtime-check";
+const defaultOutputFolder = "./.ts-runtime-validation";
 
 export interface ICommandOptions {
     readonly glob: string;

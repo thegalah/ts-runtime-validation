@@ -11,7 +11,7 @@
         "typescript-json-schema": "^0.53.0"
     },
     "bin": {
-        "ts-runtime-check": "dist/index.js"
+        "ts-runtime-validation": "dist/index.js"
     },
     "scripts": {
         "build": "tsc",
@@ -28,12 +28,12 @@
     "main": "index.js",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/thegalah/ts-runtime-check.git"
+        "url": "git+https://github.com/thegalah/ts-runtime-validation.git"
     },
     "bugs": {
-        "url": "https://github.com/thegalah/ts-runtime-check/issues"
+        "url": "https://github.com/thegalah/ts-runtime-validation/issues"
     },
-    "homepage": "https://github.com/thegalah/ts-runtime-check#readme",
+    "homepage": "https://github.com/thegalah/ts-runtime-validation#readme",
     "peerDependencies": {
         "ajv": "^8.11.0"
     }
