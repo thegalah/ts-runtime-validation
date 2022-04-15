@@ -43,11 +43,20 @@ export class SchemaGenerator {
     public constructor(private options: ICommandOptions) {}
 
     public Generate = async () => {
-        const { helpers } = this.options;
+        const { helpers, glob } = this.options;
         const fileList = await this.getMatchingFiles();
+
         console.log(`Found ${fileList.length} schema file(s)`);
+        if (fileList.length === 0) {
+            console.log(`Aborting - no files found with glob: ${glob}`);
+            return;
+        }
         const map = await this.getJsonSchemaMap(fileList);
         console.log(`Generating ${map.size} validation schema(s)`);
+        if (map.size === 0) {
+            console.log(`Aborting - no interfaces found: ${glob}`);
+            return;
+        }
         this.writeSchemaMapToValidationSchema(map);
         if (helpers === false) {
             console.log("Skipping helper file generation");
