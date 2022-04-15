@@ -32,4 +32,5 @@ program.parse();
 
 const options = program.opts<ICommandOptions>();
 
-new SchemaGenerator(options);
+const generator = new SchemaGenerator(options);
+generator.Generate();
