@@ -82,12 +82,13 @@ export class SchemaGenerator {
     };
 
     private getJsonSchemaMap = async (filesList: Array<string>) => {
+        const { additionalProperties } = this.options;
         const schemaMap = new Map<string, Schema>();
         filesList.forEach((file) => {
             const config: Config = {
                 path: file,
                 type: "*",
-                additionalProperties: false,
+                additionalProperties,
             };
 
             const schemaGenerator = tsj.createGenerator(config);

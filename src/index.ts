@@ -13,6 +13,7 @@ export interface ICommandOptions {
     readonly rootPath: string;
     readonly output: string;
     readonly helpers: boolean;
+    readonly additionalProperties: boolean;
 }
 
 program.option(
@@ -27,6 +28,7 @@ program.option(
     defaultOutputFolder
 );
 program.option("--no-helpers", "Only generate JSON schema without typescript helper files", true);
+program.option("--no-additionalProperties", "Allow additional properties to pass validation", true);
 
 program.parse();
 
