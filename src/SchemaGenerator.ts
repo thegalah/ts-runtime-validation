@@ -88,6 +88,8 @@ export class SchemaGenerator {
                 path: file,
                 type: "*",
                 additionalProperties,
+                encodeRefs: false,
+                topRef: true,
             };
 
             const schemaGenerator = tsj.createGenerator(config);
