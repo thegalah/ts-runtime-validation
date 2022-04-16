@@ -52,18 +52,18 @@ export class SchemaGenerator {
             console.log(`Aborting - no files found with glob: ${glob}`);
             return;
         }
-        const map = await this.getJsonSchemaMap(fileList);
-        console.log(`Generating ${map.size} validation schema(s)`);
-        if (map.size === 0) {
+        const fileSchemas = await this.getJsonSchemaMap(fileList);
+        console.log(`Generating ${fileSchemas.size} validation schema(s)`);
+        if (fileSchemas.size === 0) {
             console.log(`Aborting - no interfaces found: ${glob}`);
             return;
         }
-        this.writeSchemaMapToValidationSchema(map);
+        this.writeSchemaMapToValidationSchema(fileSchemas);
         if (helpers === false) {
             console.log("Skipping helper file generation");
             return;
         }
-        await this.writeSchemaMapToValidationTypes(map, fileList);
+        await this.writeSchemaMapToValidationTypes(fileSchemas, fileList);
         this.writeValidatorFunction();
     };
 
@@ -86,56 +86,16 @@ export class SchemaGenerator {
         filesList.forEach((file) => {
             const config: Config = {
                 path: file,
-                tsconfig: "tsconfig.json",
                 type: "*",
                 additionalProperties: false,
             };
 
-            const schema = tsj.createGenerator(config).createSchema(config.type);
-            const schemaString = JSON.stringify(schema, null, 2);
-            console.log(schemaString);
-
-            // fs.writeFile(this.outputPath, schemaString, (err) => {
-            //     if (err) throw err;
-            // });
+            const schemaGenerator = tsj.createGenerator(config);
+            const fileSchemas = schemaGenerator.createSchema(config.type);
+            schemaMap.set(file, fileSchemas);
         });
         return schemaMap;
     };
-
-    // private getJsonSchemaMap = async (filesList: Array<string>) => {
-    //     const schemaMap = new Map<string, TJS.Definition>();
-    //     const files = filesList.map((fileName) => {
-    //         return resolve(fileName);
-    //     });
-    //     const settings: TJS.PartialArgs = {
-    //         required: true,
-    //         titles: true,
-    //         aliasRef: true,
-    //         ref: true,
-    //         noExtraProps: true,
-    //         propOrder: true,
-    //     };
-
-    //     const compilerOptions: TJS.CompilerOptions = {
-    //         strictNullChecks: true,
-    //     };
-
-    //     const program = TJS.getProgramFromFiles(files, compilerOptions);
-
-    //     const generator = TJS.buildGenerator(program, settings);
-    //     const userDefinedSymbols = generator?.getMainFileSymbols(program) ?? [];
-    //     userDefinedSymbols.forEach((symbol) => {
-    //         if (schemaMap.has(symbol)) {
-    //             throw new Error(`Duplicate symbol "${symbol}" found.`);
-    //         }
-    //         const schema = generator?.getSchemaForSymbol(symbol);
-    //         if (schema) {
-    //             schemaMap.set(symbol, schema);
-    //         }
-    //     });
-
-    //     return schemaMap;
-    // };
 
     private getSchemaVersion = (schemaMap: Map<string, Schema>) => {
         const firstEntry = schemaMap.values().next().value;
@@ -150,8 +110,16 @@ export class SchemaGenerator {
 
     private writeSchemaMapToValidationSchema = (schemaMap: Map<string, Schema>) => {
         const definitions: { [id: string]: Schema } = {};
-        schemaMap.forEach((schema, key) => {
-            definitions[key] = schema;
+        schemaMap.forEach((fileSchema) => {
+            const defs = fileSchema.definitions ?? {};
+
+            Object.keys(defs).forEach((key) => {
+                if (defs[key] !== undefined) {
+                    throw new Error(`Duplicate symbol: ${key} found`);
+                }
+                const schema = defs[key] as Schema;
+                definitions[key] = schema;
+            });
         });
         const outputBuffer: Schema = {
             $schema: this.getSchemaVersion(schemaMap),
