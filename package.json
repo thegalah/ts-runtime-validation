@@ -8,7 +8,8 @@
         "fdir": "^5.2.0",
         "picomatch": "^2.3.1",
         "ts-json-schema-generator": "^1.0.0",
-        "ts-morph": "^14.0.0"
+        "ts-morph": "^14.0.0",
+        "ts-runtime-validation": "../ts-runtime-validation"
     },
     "bin": {
         "ts-runtime-validation": "dist/index.js"

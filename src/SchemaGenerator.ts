@@ -15,7 +15,8 @@ import {
     ProjectOptions,
     SourceFileCreateOptions,
 } from "ts-morph";
-import tsj, { Config, Schema } from "ts-json-schema-generator";
+import * as tsj from "ts-json-schema-generator";
+import { Config, Schema } from "ts-json-schema-generator";
 
 const defaultTsMorphProjectSettings: ProjectOptions = {
     manipulationSettings: {
