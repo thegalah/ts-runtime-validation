@@ -1,6 +1,6 @@
 {
     "name": "ts-runtime-validation",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "author": "Matthew Duong <thegalah@gmail.com>",
     "license": "MIT",
     "dependencies": {
@@ -8,8 +8,7 @@
         "fdir": "^5.2.0",
         "picomatch": "^2.3.1",
         "ts-json-schema-generator": "^1.0.0",
-        "ts-morph": "^14.0.0",
-        "ts-runtime-validation": "../ts-runtime-validation"
+        "ts-morph": "^14.0.0"
     },
     "bin": {
         "ts-runtime-validation": "dist/index.js"
