@@ -15,23 +15,9 @@ import {
     ProjectOptions,
     SourceFileCreateOptions,
 } from "ts-morph";
-import tsj, { Config } from "ts-json-schema-generator";
+import tsj, { Config, Schema } from "ts-json-schema-generator";
 
-const config: Config = {
-    path: "path/to/source/file",
-    tsconfig: "path/to/tsconfig.json",
-    type: "*",
-};
-
-const output_path = "path/to/output/file";
-
-const schema = tsj.createGenerator(config).createSchema(config.type);
-const schemaString = JSON.stringify(schema, null, 2);
-fs.writeFile(output_path, schemaString, (err) => {
-    if (err) throw err;
-});
-
-const defaultProjectSettings: ProjectOptions = {
+const defaultTsMorphProjectSettings: ProjectOptions = {
     manipulationSettings: {
         indentationText: IndentationText.FourSpaces,
         newLineKind: NewLineKind.LineFeed,
@@ -95,41 +81,62 @@ export class SchemaGenerator {
     };
 
     private getJsonSchemaMap = async (filesList: Array<string>) => {
-        const schemaMap = new Map<string, TJS.Definition>();
-        const files = filesList.map((fileName) => {
-            return resolve(fileName);
+        const schemaMap = new Map<string, Schema>();
+        filesList.forEach((file) => {
+            const config: Config = {
+                path: file,
+                tsconfig: "tsconfig.json",
+                type: "*",
+                additionalProperties: false,
+            };
+
+            const schema = tsj.createGenerator(config).createSchema(config.type);
+            const schemaString = JSON.stringify(schema, null, 2);
+            console.log(schemaString);
+
+            // fs.writeFile(this.outputPath, schemaString, (err) => {
+            //     if (err) throw err;
+            // });
         });
-        const settings: TJS.PartialArgs = {
-            required: true,
-            titles: true,
-            aliasRef: true,
-            ref: true,
-            noExtraProps: true,
-            propOrder: true,
-        };
-
-        const compilerOptions: TJS.CompilerOptions = {
-            strictNullChecks: true,
-        };
-
-        const program = TJS.getProgramFromFiles(files, compilerOptions);
-
-        const generator = TJS.buildGenerator(program, settings);
-        const userDefinedSymbols = generator?.getMainFileSymbols(program) ?? [];
-        userDefinedSymbols.forEach((symbol) => {
-            if (schemaMap.has(symbol)) {
-                throw new Error(`Duplicate symbol "${symbol}" found.`);
-            }
-            const schema = generator?.getSchemaForSymbol(symbol);
-            if (schema) {
-                schemaMap.set(symbol, schema);
-            }
-        });
-
         return schemaMap;
     };
 
-    private getSchemaVersion = (schemaMap: Map<string, TJS.Definition>) => {
+    // private getJsonSchemaMap = async (filesList: Array<string>) => {
+    //     const schemaMap = new Map<string, TJS.Definition>();
+    //     const files = filesList.map((fileName) => {
+    //         return resolve(fileName);
+    //     });
+    //     const settings: TJS.PartialArgs = {
+    //         required: true,
+    //         titles: true,
+    //         aliasRef: true,
+    //         ref: true,
+    //         noExtraProps: true,
+    //         propOrder: true,
+    //     };
+
+    //     const compilerOptions: TJS.CompilerOptions = {
+    //         strictNullChecks: true,
+    //     };
+
+    //     const program = TJS.getProgramFromFiles(files, compilerOptions);
+
+    //     const generator = TJS.buildGenerator(program, settings);
+    //     const userDefinedSymbols = generator?.getMainFileSymbols(program) ?? [];
+    //     userDefinedSymbols.forEach((symbol) => {
+    //         if (schemaMap.has(symbol)) {
+    //             throw new Error(`Duplicate symbol "${symbol}" found.`);
+    //         }
+    //         const schema = generator?.getSchemaForSymbol(symbol);
+    //         if (schema) {
+    //             schemaMap.set(symbol, schema);
+    //         }
+    //     });
+
+    //     return schemaMap;
+    // };
+
+    private getSchemaVersion = (schemaMap: Map<string, Schema>) => {
         const firstEntry = schemaMap.values().next().value;
         return firstEntry["$schema"] ?? "";
     };
@@ -140,12 +147,12 @@ export class SchemaGenerator {
         }
     };
 
-    private writeSchemaMapToValidationSchema = (schemaMap: Map<string, TJS.Definition>) => {
-        const definitions: { [id: string]: TJS.Definition } = {};
+    private writeSchemaMapToValidationSchema = (schemaMap: Map<string, Schema>) => {
+        const definitions: { [id: string]: Schema } = {};
         schemaMap.forEach((schema, key) => {
             definitions[key] = schema;
         });
-        const outputBuffer: TJS.Definition = {
+        const outputBuffer: Schema = {
             $schema: this.getSchemaVersion(schemaMap),
             definitions,
         };
@@ -154,8 +161,8 @@ export class SchemaGenerator {
         fs.writeFileSync(this.jsonSchemaOutputFile, JSON.stringify(outputBuffer, null, 4));
     };
 
-    private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, TJS.Definition>, fileList: Array<string>) => {
-        const project = new Project(defaultProjectSettings);
+    private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, Schema>, fileList: Array<string>) => {
+        const project = new Project(defaultTsMorphProjectSettings);
 
         const symbols = Array.from(schemaMap.keys()).filter((symbol) => {
             return symbol !== "ISchema" && symbol !== "Schemas";
@@ -218,7 +225,7 @@ export class SchemaGenerator {
     };
 
     private writeValidatorFunction = async () => {
-        const project = new Project(defaultProjectSettings);
+        const project = new Project(defaultTsMorphProjectSettings);
         const sourceFile = project.createSourceFile(this.isValidSchemaOutputFile, {}, defaultCreateFileOptions);
         sourceFile.addImportDeclaration({ namespaceImport: "schema", moduleSpecifier: `./${validationSchemaFileName}` });
         sourceFile.addImportDeclaration({ defaultImport: "Ajv", moduleSpecifier: "ajv" });
