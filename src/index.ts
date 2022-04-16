@@ -28,7 +28,7 @@ program.option(
     defaultOutputFolder
 );
 program.option("--no-helpers", "Only generate JSON schema without typescript helper files", true);
-program.option("--no-additionalProperties", "Allow additional properties to pass validation", true);
+program.option("--additionalProperties", "Allow additional properties to pass validation", false);
 
 program.parse();
 
