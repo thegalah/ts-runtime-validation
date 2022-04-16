@@ -89,7 +89,7 @@ export class SchemaGenerator {
                 type: "*",
                 additionalProperties,
                 encodeRefs: false,
-                topRef: true,
+                topRef: false,
                 expose: "none",
                 sortProps: true,
             };
