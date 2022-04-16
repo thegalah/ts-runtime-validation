@@ -133,9 +133,7 @@ export class SchemaGenerator {
     private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, Schema>) => {
         const project = new Project(defaultTsMorphProjectSettings);
 
-        const symbols = Array.from(schemaMap.keys()).filter((symbol) => {
-            return symbol !== "ISchema" && symbol !== "Schemas";
-        });
+        const symbols: Array<string> = [];
 
         const importMap = new Map<string, Array<string>>();
         schemaMap.forEach((schema, filePath) => {
@@ -149,10 +147,12 @@ export class SchemaGenerator {
                 const namedImports = importMap.get(importPath) ?? [];
                 namedImports.push(symbol);
                 importMap.set(importPath, namedImports);
+                symbols.push(symbol);
             });
         });
 
         const sourceFile = project.createSourceFile(this.tsSchemaDefinitionOutputFile, {}, defaultCreateFileOptions);
+
         importMap.forEach((namedImports, importPath) => {
             sourceFile.addImportDeclaration({ namedImports, moduleSpecifier: importPath });
         });
@@ -186,7 +186,6 @@ export class SchemaGenerator {
         sourceFile.addExportDeclaration({
             namedExports: ["schemas", "ISchema"],
         });
-
         await project.save();
     };
 
@@ -199,7 +198,6 @@ export class SchemaGenerator {
             namedImports: ["ISchema", "schemas"],
             moduleSpecifier: `./${path.parse(schemaDefinitionFileName).name}`,
         });
-
         sourceFile.addVariableStatement({
             declarationKind: VariableDeclarationKind.Const,
             declarations: [
