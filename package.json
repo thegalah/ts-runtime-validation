@@ -7,8 +7,8 @@
         "commander": "^9.1.0",
         "fdir": "^5.2.0",
         "picomatch": "^2.3.1",
-        "ts-morph": "^14.0.0",
-        "typescript-json-schema": "^0.53.0"
+        "ts-json-schema-generator": "^1.0.0",
+        "ts-morph": "^14.0.0"
     },
     "bin": {
         "ts-runtime-validation": "dist/index.js"

@@ -1,7 +1,6 @@
 import { fdir } from "fdir";
 import { ICommandOptions } from "./index";
 import { resolve } from "path";
-import * as TJS from "typescript-json-schema";
 import fs from "fs";
 import picomatch from "picomatch";
 import path from "path";
@@ -16,6 +15,21 @@ import {
     ProjectOptions,
     SourceFileCreateOptions,
 } from "ts-morph";
+import tsj, { Config } from "ts-json-schema-generator";
+
+const config: Config = {
+    path: "path/to/source/file",
+    tsconfig: "path/to/tsconfig.json",
+    type: "*",
+};
+
+const output_path = "path/to/output/file";
+
+const schema = tsj.createGenerator(config).createSchema(config.type);
+const schemaString = JSON.stringify(schema, null, 2);
+fs.writeFile(output_path, schemaString, (err) => {
+    if (err) throw err;
+});
 
 const defaultProjectSettings: ProjectOptions = {
     manipulationSettings: {
