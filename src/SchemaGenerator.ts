@@ -1,7 +1,5 @@
 import { fdir } from "fdir";
 import { ICommandOptions } from "./index";
-import { resolve } from "path";
-import * as TJS from "typescript-json-schema";
 import fs from "fs";
 import picomatch from "picomatch";
 import path from "path";
@@ -16,8 +14,10 @@ import {
     ProjectOptions,
     SourceFileCreateOptions,
 } from "ts-morph";
+import * as tsj from "ts-json-schema-generator";
+import { Config, Schema } from "ts-json-schema-generator";
 
-const defaultProjectSettings: ProjectOptions = {
+const defaultTsMorphProjectSettings: ProjectOptions = {
     manipulationSettings: {
         indentationText: IndentationText.FourSpaces,
         newLineKind: NewLineKind.LineFeed,
@@ -51,18 +51,18 @@ export class SchemaGenerator {
             console.log(`Aborting - no files found with glob: ${glob}`);
             return;
         }
-        const map = await this.getJsonSchemaMap(fileList);
-        console.log(`Generating ${map.size} validation schema(s)`);
-        if (map.size === 0) {
+        const fileSchemas = await this.getJsonSchemaMap(fileList);
+        console.log(`Generating ${fileSchemas.size} validation schema(s)`);
+        if (fileSchemas.size === 0) {
             console.log(`Aborting - no interfaces found: ${glob}`);
             return;
         }
-        this.writeSchemaMapToValidationSchema(map);
+        this.writeSchemaMapToValidationSchema(fileSchemas);
         if (helpers === false) {
             console.log("Skipping helper file generation");
             return;
         }
-        await this.writeSchemaMapToValidationTypes(map, fileList);
+        await this.writeSchemaMapToValidationTypes(fileSchemas);
         this.writeValidatorFunction();
     };
 
@@ -81,41 +81,23 @@ export class SchemaGenerator {
     };
 
     private getJsonSchemaMap = async (filesList: Array<string>) => {
-        const schemaMap = new Map<string, TJS.Definition>();
-        const files = filesList.map((fileName) => {
-            return resolve(fileName);
+        const { additionalProperties } = this.options;
+        const schemaMap = new Map<string, Schema>();
+        filesList.forEach((file) => {
+            const config: Config = {
+                path: file,
+                type: "*",
+                additionalProperties,
+            };
+
+            const schemaGenerator = tsj.createGenerator(config);
+            const fileSchemas = schemaGenerator.createSchema(config.type);
+            schemaMap.set(file, fileSchemas);
         });
-        const settings: TJS.PartialArgs = {
-            required: true,
-            titles: true,
-            aliasRef: true,
-            ref: true,
-            noExtraProps: true,
-            propOrder: true,
-        };
-
-        const compilerOptions: TJS.CompilerOptions = {
-            strictNullChecks: true,
-        };
-
-        const program = TJS.getProgramFromFiles(files, compilerOptions);
-
-        const generator = TJS.buildGenerator(program, settings);
-        const userDefinedSymbols = generator?.getMainFileSymbols(program) ?? [];
-        userDefinedSymbols.forEach((symbol) => {
-            if (schemaMap.has(symbol)) {
-                throw new Error(`Duplicate symbol "${symbol}" found.`);
-            }
-            const schema = generator?.getSchemaForSymbol(symbol);
-            if (schema) {
-                schemaMap.set(symbol, schema);
-            }
-        });
-
         return schemaMap;
     };
 
-    private getSchemaVersion = (schemaMap: Map<string, TJS.Definition>) => {
+    private getSchemaVersion = (schemaMap: Map<string, Schema>) => {
         const firstEntry = schemaMap.values().next().value;
         return firstEntry["$schema"] ?? "";
     };
@@ -126,12 +108,20 @@ export class SchemaGenerator {
         }
     };
 
-    private writeSchemaMapToValidationSchema = (schemaMap: Map<string, TJS.Definition>) => {
-        const definitions: { [id: string]: TJS.Definition } = {};
-        schemaMap.forEach((schema, key) => {
-            definitions[key] = schema;
+    private writeSchemaMapToValidationSchema = (schemaMap: Map<string, Schema>) => {
+        const definitions: { [id: string]: Schema } = {};
+        schemaMap.forEach((fileSchema) => {
+            const defs = fileSchema.definitions ?? {};
+
+            Object.keys(defs).forEach((key) => {
+                if (definitions[key] !== undefined) {
+                    throw new Error(`Duplicate symbol: ${key} found`);
+                }
+                const schema = defs[key] as Schema;
+                definitions[key] = schema;
+            });
         });
-        const outputBuffer: TJS.Definition = {
+        const outputBuffer: Schema = {
             $schema: this.getSchemaVersion(schemaMap),
             definitions,
         };
@@ -140,32 +130,29 @@ export class SchemaGenerator {
         fs.writeFileSync(this.jsonSchemaOutputFile, JSON.stringify(outputBuffer, null, 4));
     };
 
-    private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, TJS.Definition>, fileList: Array<string>) => {
-        const project = new Project(defaultProjectSettings);
+    private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, Schema>) => {
+        const project = new Project(defaultTsMorphProjectSettings);
 
-        const symbols = Array.from(schemaMap.keys()).filter((symbol) => {
-            return symbol !== "ISchema" && symbol !== "Schemas";
-        });
-
-        const readerProject = new Project();
-        readerProject.addSourceFilesAtPaths(fileList);
+        const symbols: Array<string> = [];
 
         const importMap = new Map<string, Array<string>>();
-        fileList.forEach((file) => {
-            const dir = path.dirname(file);
-            const fileWithoutExtension = path.parse(file).name;
+        schemaMap.forEach((schema, filePath) => {
+            const dir = path.dirname(filePath);
+            const fileWithoutExtension = path.parse(filePath).name;
             const relativeFilePath = path.relative(this.outputPath, dir);
             const importPath = `${relativeFilePath}/${fileWithoutExtension}`;
-            const source = readerProject.getSourceFile(file);
-            source?.getInterfaces().forEach((interfaceDeclaration) => {
-                const structure = interfaceDeclaration.getStructure();
+            const defs = schema.definitions ?? {};
+
+            Object.keys(defs).forEach((symbol) => {
                 const namedImports = importMap.get(importPath) ?? [];
-                namedImports.push(structure.name);
+                namedImports.push(symbol);
                 importMap.set(importPath, namedImports);
+                symbols.push(symbol);
             });
         });
 
         const sourceFile = project.createSourceFile(this.tsSchemaDefinitionOutputFile, {}, defaultCreateFileOptions);
+
         importMap.forEach((namedImports, importPath) => {
             sourceFile.addImportDeclaration({ namedImports, moduleSpecifier: importPath });
         });
@@ -199,12 +186,11 @@ export class SchemaGenerator {
         sourceFile.addExportDeclaration({
             namedExports: ["schemas", "ISchema"],
         });
-
         await project.save();
     };
 
     private writeValidatorFunction = async () => {
-        const project = new Project(defaultProjectSettings);
+        const project = new Project(defaultTsMorphProjectSettings);
         const sourceFile = project.createSourceFile(this.isValidSchemaOutputFile, {}, defaultCreateFileOptions);
         sourceFile.addImportDeclaration({ namespaceImport: "schema", moduleSpecifier: `./${validationSchemaFileName}` });
         sourceFile.addImportDeclaration({ defaultImport: "Ajv", moduleSpecifier: "ajv" });
@@ -212,7 +198,6 @@ export class SchemaGenerator {
             namedImports: ["ISchema", "schemas"],
             moduleSpecifier: `./${path.parse(schemaDefinitionFileName).name}`,
         });
-
         sourceFile.addVariableStatement({
             declarationKind: VariableDeclarationKind.Const,
             declarations: [
