@@ -90,7 +90,8 @@ export class SchemaGenerator {
                 additionalProperties,
                 encodeRefs: false,
                 topRef: true,
-                expose: "export",
+                expose: "none",
+                sortProps: true,
             };
 
             const schemaGenerator = tsj.createGenerator(config);
