@@ -63,7 +63,7 @@ export class SchemaGenerator {
             console.log("Skipping helper file generation");
             return;
         }
-        await this.writeSchemaMapToValidationTypes(fileSchemas, fileList);
+        await this.writeSchemaMapToValidationTypes(fileSchemas);
         this.writeValidatorFunction();
     };
 
@@ -130,27 +130,24 @@ export class SchemaGenerator {
         fs.writeFileSync(this.jsonSchemaOutputFile, JSON.stringify(outputBuffer, null, 4));
     };
 
-    private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, Schema>, fileList: Array<string>) => {
+    private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, Schema>) => {
         const project = new Project(defaultTsMorphProjectSettings);
 
         const symbols = Array.from(schemaMap.keys()).filter((symbol) => {
             return symbol !== "ISchema" && symbol !== "Schemas";
         });
 
-        const readerProject = new Project();
-        readerProject.addSourceFilesAtPaths(fileList);
-
         const importMap = new Map<string, Array<string>>();
-        fileList.forEach((file) => {
-            const dir = path.dirname(file);
-            const fileWithoutExtension = path.parse(file).name;
+        schemaMap.forEach((schema, filePath) => {
+            const dir = path.dirname(filePath);
+            const fileWithoutExtension = path.parse(filePath).name;
             const relativeFilePath = path.relative(this.outputPath, dir);
             const importPath = `${relativeFilePath}/${fileWithoutExtension}`;
-            const source = readerProject.getSourceFile(file);
-            source?.getInterfaces().forEach((interfaceDeclaration) => {
-                const structure = interfaceDeclaration.getStructure();
+            const defs = schema.definitions ?? {};
+
+            Object.keys(defs).forEach((symbol) => {
                 const namedImports = importMap.get(importPath) ?? [];
-                namedImports.push(structure.name);
+                namedImports.push(symbol);
                 importMap.set(importPath, namedImports);
             });
         });
