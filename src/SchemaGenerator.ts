@@ -114,7 +114,7 @@ export class SchemaGenerator {
             const defs = fileSchema.definitions ?? {};
 
             Object.keys(defs).forEach((key) => {
-                if (defs[key] !== undefined) {
+                if (definitions[key] !== undefined) {
                     throw new Error(`Duplicate symbol: ${key} found`);
                 }
                 const schema = defs[key] as Schema;
