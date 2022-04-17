@@ -51,10 +51,10 @@ export class SchemaGenerator {
             console.log(`Aborting - no files found with glob: ${glob}`);
             return;
         }
-        const fileSchemas = await this.getJsonSchemaMap(fileList);
-        console.log(`Generating ${fileSchemas.size} validation schema(s)`);
+        const fileSchemas = await this.getJsonSchemasForFiles(fileList);
+
         if (fileSchemas.size === 0) {
-            console.log(`Aborting - no interfaces found: ${glob}`);
+            console.log(`Aborting - no types found: ${glob}`);
             return;
         }
         this.writeSchemaMapToValidationSchema(fileSchemas);
@@ -80,7 +80,7 @@ export class SchemaGenerator {
         return api.withPromise() as Promise<Array<string>>;
     };
 
-    private getJsonSchemaMap = async (filesList: Array<string>) => {
+    private getJsonSchemasForFiles = async (filesList: Array<string>) => {
         const { additionalProperties } = this.options;
         const schemaMap = new Map<string, Schema>();
         filesList.forEach((file) => {
@@ -88,6 +88,8 @@ export class SchemaGenerator {
                 path: file,
                 type: "*",
                 additionalProperties,
+                encodeRefs: false,
+                sortProps: true,
             };
 
             const schemaGenerator = tsj.createGenerator(config);
@@ -132,6 +134,7 @@ export class SchemaGenerator {
 
     private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, Schema>) => {
         const project = new Project(defaultTsMorphProjectSettings);
+        const readerProject = new Project(defaultTsMorphProjectSettings);
 
         const symbols: Array<string> = [];
 
@@ -143,11 +146,18 @@ export class SchemaGenerator {
             const importPath = `${relativeFilePath}/${fileWithoutExtension}`;
             const defs = schema.definitions ?? {};
 
+            const readerSourceFile = readerProject.addSourceFileAtPath(filePath);
+
             Object.keys(defs).forEach((symbol) => {
-                const namedImports = importMap.get(importPath) ?? [];
-                namedImports.push(symbol);
-                importMap.set(importPath, namedImports);
-                symbols.push(symbol);
+                const typeAlias = readerSourceFile.getTypeAlias(symbol);
+                const typeInterface = readerSourceFile.getInterface(symbol);
+                const hasTypeOrInterface = (typeAlias ?? typeInterface) !== undefined;
+                if (hasTypeOrInterface) {
+                    const namedImports = importMap.get(importPath) ?? [];
+                    namedImports.push(symbol);
+                    importMap.set(importPath, namedImports);
+                    symbols.push(symbol);
+                }
             });
         });
 
