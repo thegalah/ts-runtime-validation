@@ -51,10 +51,12 @@ export class SchemaGenerator {
             console.log(`Aborting - no files found with glob: ${glob}`);
             return;
         }
-        const fileSchemas = await this.getJsonSchemaMap(fileList);
-        console.log(`Generating ${fileSchemas.size} validation schema(s)`);
+        const fileSchemas = await this.getJsonSchemasForFiles(fileList);
+        const fileSymbols = await this.getFileSymbols(fileList);
+        console.log(fileSymbols);
+        console.log(`Generating validation schema(s)`);
         if (fileSchemas.size === 0) {
-            console.log(`Aborting - no interfaces found: ${glob}`);
+            console.log(`Aborting - no types found: ${glob}`);
             return;
         }
         this.writeSchemaMapToValidationSchema(fileSchemas);
@@ -80,7 +82,7 @@ export class SchemaGenerator {
         return api.withPromise() as Promise<Array<string>>;
     };
 
-    private getJsonSchemaMap = async (filesList: Array<string>) => {
+    private getJsonSchemasForFiles = async (filesList: Array<string>) => {
         const { additionalProperties } = this.options;
         const schemaMap = new Map<string, Schema>();
         filesList.forEach((file) => {
@@ -97,6 +99,16 @@ export class SchemaGenerator {
             schemaMap.set(file, fileSchemas);
         });
         return schemaMap;
+    };
+
+    private getFileSymbols = (fileList: Array<string>) => {
+        const symbolMap = new Map<string, Array<string>>();
+        const project = new Project(defaultTsMorphProjectSettings);
+        fileList.forEach((file) => {
+            const sourceFile = project.addSourceFileAtPath(file);
+            console.log(sourceFile.getTypeAliases());
+        });
+        return symbolMap;
     };
 
     private getSchemaVersion = (schemaMap: Map<string, Schema>) => {
