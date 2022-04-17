@@ -10,7 +10,7 @@ This is a code generator that is designed to run as a yarn / npm script. By defa
 
 1. `./src/ts-runtime-validation/validation.schema.json` - containing the [jsonschema](http://json-schema.org/) types
 1. `./src/SchemaDefinition.ts` - containing the typescript.
-1. `./src/isSchemaValid.ts` - containing a type guard type inferring helper method (intended for consumption in your code base - examples below)
+1. `./src/isValidSchema.ts` - containing a type guard type inferring helper method (intended for consumption in your code base - examples below)
 
 ## Footnote
 

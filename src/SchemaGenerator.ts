@@ -38,7 +38,7 @@ export class SchemaGenerator {
     private outputPath = path.join(this.options.rootPath, this.options.output);
     private jsonSchemaOutputFile = path.join(this.options.rootPath, this.options.output, validationSchemaFileName);
     private tsSchemaDefinitionOutputFile = path.join(this.options.rootPath, this.options.output, schemaDefinitionFileName);
-    private isValidSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "isSchemaValid.ts");
+    private isValidSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "isValidSchema.ts");
 
     public constructor(private options: ICommandOptions) {}
 
@@ -223,6 +223,7 @@ export class SchemaGenerator {
 
         sourceFile.addVariableStatement({
             declarationKind: VariableDeclarationKind.Const,
+            isExported: true,
             declarations: [
                 {
                     name: "isValidSchema",
@@ -237,7 +238,7 @@ export class SchemaGenerator {
         });
 
         sourceFile.addExportDeclaration({
-            namedExports: ["validator", "isValidSchema"],
+            namedExports: ["validator"],
         });
         await project.save();
     };
