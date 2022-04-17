@@ -53,7 +53,6 @@ export class SchemaGenerator {
         }
         const fileSchemas = await this.getJsonSchemasForFiles(fileList);
 
-        console.log(`Generating validation schema(s)`);
         if (fileSchemas.size === 0) {
             console.log(`Aborting - no types found: ${glob}`);
             return;
@@ -99,20 +98,6 @@ export class SchemaGenerator {
         });
         return schemaMap;
     };
-
-    // private getFileSymbols = (fileList: Array<string>) => {
-    //     const symbolMap = new Map<string, Array<string>>();
-    //     const project = new Project(defaultTsMorphProjectSettings);
-    //     fileList.forEach((file) => {
-    //         console.log(file);
-    //         const sourceFile = project.addSourceFileAtPath(file);
-    //         const aliases = sourceFile.getTypeAliases();
-    //         aliases.forEach((alias) => {
-    //             console.log(alias.getName());
-    //         });
-    //     });
-    //     return symbolMap;
-    // };
 
     private getSchemaVersion = (schemaMap: Map<string, Schema>) => {
         const firstEntry = schemaMap.values().next().value;
