@@ -39,6 +39,9 @@ import { isValidSchema } from "./.ts-runtime-validation/isValidSchema"; // this 
 
 if (isValidSchema(data, "#/definitions/ITypeA")) {
     // variable: data in this block will have typings for ITypeA
+} else {
+    // type is invalid and not known here
+    throw new Error("Failed to validate payload");
 }
 ```
 
