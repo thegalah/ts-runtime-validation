@@ -168,6 +168,7 @@ export class SchemaGenerator {
         });
 
         sourceFile.addVariableStatement({
+            isExported: true,
             declarationKind: VariableDeclarationKind.Const,
             declarations: [
                 {
@@ -187,15 +188,12 @@ export class SchemaGenerator {
         sourceFile.addInterface({
             kind: StructureKind.Interface,
             name: "ISchema",
-            isExported: false,
+            isExported: true,
             properties: symbols.map((symbol) => {
                 return { name: `readonly ["#/definitions/${symbol}"]`, type: symbol };
             }),
         });
 
-        sourceFile.addExportDeclaration({
-            namedExports: ["schemas", "ISchema"],
-        });
         await project.save();
     };
 
@@ -209,6 +207,7 @@ export class SchemaGenerator {
             moduleSpecifier: `./${path.parse(schemaDefinitionFileName).name}`,
         });
         sourceFile.addVariableStatement({
+            isExported: true,
             declarationKind: VariableDeclarationKind.Const,
             declarations: [
                 {
@@ -235,10 +234,6 @@ export class SchemaGenerator {
                     },
                 },
             ],
-        });
-
-        sourceFile.addExportDeclaration({
-            namedExports: ["validator"],
         });
         await project.save();
     };
