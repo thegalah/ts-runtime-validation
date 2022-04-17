@@ -38,7 +38,7 @@ export class SchemaGenerator {
     private outputPath = path.join(this.options.rootPath, this.options.output);
     private jsonSchemaOutputFile = path.join(this.options.rootPath, this.options.output, validationSchemaFileName);
     private tsSchemaDefinitionOutputFile = path.join(this.options.rootPath, this.options.output, schemaDefinitionFileName);
-    private isValidSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "isSchemaValid.ts");
+    private isValidSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "isValidSchema.ts");
 
     public constructor(private options: ICommandOptions) {}
 
@@ -168,6 +168,7 @@ export class SchemaGenerator {
         });
 
         sourceFile.addVariableStatement({
+            isExported: true,
             declarationKind: VariableDeclarationKind.Const,
             declarations: [
                 {
@@ -187,15 +188,12 @@ export class SchemaGenerator {
         sourceFile.addInterface({
             kind: StructureKind.Interface,
             name: "ISchema",
-            isExported: false,
+            isExported: true,
             properties: symbols.map((symbol) => {
                 return { name: `readonly ["#/definitions/${symbol}"]`, type: symbol };
             }),
         });
 
-        sourceFile.addExportDeclaration({
-            namedExports: ["schemas", "ISchema"],
-        });
         await project.save();
     };
 
@@ -209,6 +207,7 @@ export class SchemaGenerator {
             moduleSpecifier: `./${path.parse(schemaDefinitionFileName).name}`,
         });
         sourceFile.addVariableStatement({
+            isExported: true,
             declarationKind: VariableDeclarationKind.Const,
             declarations: [
                 {
@@ -223,6 +222,7 @@ export class SchemaGenerator {
 
         sourceFile.addVariableStatement({
             declarationKind: VariableDeclarationKind.Const,
+            isExported: true,
             declarations: [
                 {
                     name: "isValidSchema",
@@ -234,10 +234,6 @@ export class SchemaGenerator {
                     },
                 },
             ],
-        });
-
-        sourceFile.addExportDeclaration({
-            namedExports: ["validator", "isValidSchema"],
         });
         await project.save();
     };
