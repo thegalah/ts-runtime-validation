@@ -16,6 +16,15 @@ This is a code generator that is designed to run as a yarn / npm script. By defa
 
 The helper file assumes you have [ajv-validator](https://github.com/ajv-validator/ajv) peer dependency installed. Since this is only a code generation tool this package can be installed as a dev dependency.
 
+## Installation
+
+```bash
+# yarn
+yarn add --dev ts-runtime-validation
+# npm
+npm install --dev ts-runtime-validation
+```
+
 ## CLI usage
 
 Ensure your project files containing the schemas you want to validate end with the prefix `.jsonschema.ts`
@@ -30,6 +39,21 @@ Options:
   --no-helpers            Only generate JSON schema without typescript helper files
   --additionalProperties  Allow additional properties to pass validation (default: false)
   -h, --help              display help for command
+```
+
+## npm script usage
+
+The intended use for ts-runtime-validation is as a npm script. Here it can also be tweaked to watch (eg. using nodemon)
+
+```json
+{
+    "scripts": {
+        "generate-types": "ts-runtime-validation"
+    },
+    "devDependencies": {
+        "ts-runtime-validation": "^1.2.0"
+    }
+}
 ```
 
 ## Example usage of generated ts type validation
