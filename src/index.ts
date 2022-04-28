@@ -23,7 +23,7 @@ program.option(
 );
 program.option("--rootPath <rootFolder>", `RootPath of source`, defaultRootPath);
 program.option("--output <outputFolder>", `Code generation output directory (relative to root path)`, defaultOutputFolder);
-program.option("--no-helpers", "Only generate JSON schema without typescript helper files", true);
+program.option("--generate-helpers", "Only generate JSON schema without typescript helper files", true);
 program.option("--additionalProperties", "Allow additional properties to pass validation", false);
 
 program.parse();
