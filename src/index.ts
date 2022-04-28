@@ -33,7 +33,6 @@ program.option("--additionalProperties", "Allow additional properties to pass va
 program.parse();
 
 const options = program.opts<ICommandOptions>();
-console.log(options);
 
 const generator = new SchemaGenerator(options);
 generator.Generate();
