@@ -21,13 +21,9 @@ program.option(
     `Glob file path of typescript files to generate ts-interface -> json-schema validations - default: ${defaultGlobPattern}`,
     defaultGlobPattern
 );
-program.option("--rootPath <rootFolder>", `RootPath of source - default: ${defaultRootPath}`, defaultRootPath);
-program.option(
-    "--output <outputFolder>",
-    `Validation schema + typescript interface output directory (relative to root path) - default: ${defaultOutputFolder}`,
-    defaultOutputFolder
-);
-program.option("--no-helpers", "Only generate JSON schema without typescript helper files", true);
+program.option("--rootPath <rootFolder>", `RootPath of source`, defaultRootPath);
+program.option("--output <outputFolder>", `Code generation output directory (relative to root path)`, defaultOutputFolder);
+program.option("--generate-helpers", "Only generate JSON schema without typescript helper files", true);
 program.option("--additionalProperties", "Allow additional properties to pass validation", false);
 
 program.parse();
