@@ -23,7 +23,7 @@ program.option(
 );
 program.option("--rootPath", `RootPath of source - default: ${defaultRootPath}`, defaultRootPath);
 program.option(
-    "--output",
+    "--output <outputFolder>",
     `Validation schema + typescript interface output directory (relative to root path) - default: ${defaultOutputFolder}`,
     defaultOutputFolder
 );
