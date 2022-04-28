@@ -21,7 +21,7 @@ program.option(
     `Glob file path of typescript files to generate ts-interface -> json-schema validations - default: ${defaultGlobPattern}`,
     defaultGlobPattern
 );
-program.option("--rootPath <rootDir>", `RootPath of source - default: ${defaultRootPath}`, defaultRootPath);
+program.option("--rootPath <rootFolder>", `RootPath of source - default: ${defaultRootPath}`, defaultRootPath);
 program.option(
     "--output <outputFolder>",
     `Validation schema + typescript interface output directory (relative to root path) - default: ${defaultOutputFolder}`,
