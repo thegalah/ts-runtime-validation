@@ -81,8 +81,9 @@ export class SchemaGenerator {
     };
 
     private getJsonSchemasForFiles = async (filesList: Array<string>) => {
-        const { additionalProperties } = this.options;
+        const { additionalProperties, tsconfigPath } = this.options;
         const schemaMap = new Map<string, Schema>();
+        const tsconfig = tsconfigPath.length > 0 ? tsconfigPath : undefined;
         filesList.forEach((file) => {
             const config: Config = {
                 path: file,
@@ -90,6 +91,7 @@ export class SchemaGenerator {
                 additionalProperties,
                 encodeRefs: false,
                 sortProps: true,
+                ...(tsconfig !== null ? { tsconfig } : {}),
             };
 
             const schemaGenerator = tsj.createGenerator(config);
