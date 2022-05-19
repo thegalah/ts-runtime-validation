@@ -33,12 +33,14 @@ Ensure your project files containing the schemas you want to validate end with t
 Usage: ts-runtime-validation [options]
 
 Options:
-  --glob                   Glob file path of typescript files to generate ts-interface -> json-schema validations - default: *.jsonschema.{ts,tsx}
-  --rootPath <rootFolder>  RootPath of source (default: "./src")
-  --output <outputFolder>  Code generation output directory (relative to root path) (default: "./.ts-runtime-validation")
-  --generate-helpers       Only generate JSON schema without typescript helper files (default: true)
-  --additionalProperties   Allow additional properties to pass validation (default: false)
-  -h, --help               display help for command
+  --glob                         Glob file path of typescript files to generate ts-interface -> json-schema validations - default: *.jsonschema.{ts,tsx}
+  --rootPath <rootFolder>        RootPath of source (default: "./src")
+  --output <outputFolder>        Code generation output directory (relative to root path) (default: "./.ts-runtime-validation")
+  --tsconfigPath <tsconfigPath>  Path to customt tsconfig (relative to root path) (default: "")
+  --generate-helpers             Only generate JSON schema without typescript helper files (default: true)
+  --additionalProperties         Allow additional properties to pass validation (default: false)
+  -h, --help                     display help for command
+Done in 0.44s.
 ```
 
 ## npm script usage
