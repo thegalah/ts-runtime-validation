@@ -36,7 +36,7 @@ const schemaDefinitionFileName = "SchemaDefinition.ts";
 
 export class SchemaGenerator {
     private outputPath = path.join(this.options.rootPath, this.options.output);
-    // private jsonSchemaOutputFile = path.join(this.options.rootPath, this.options.output, validationSchemaFileName);
+    private jsonSchemaOutputFile = path.join(this.options.rootPath, this.options.output, validationSchemaFileName);
     private tsSchemaDefinitionOutputFile = path.join(this.options.rootPath, this.options.output, schemaDefinitionFileName);
     private isValidSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "isValidSchema.ts");
 
@@ -101,10 +101,10 @@ export class SchemaGenerator {
         return schemaMap;
     };
 
-    // private getSchemaVersion = (schemaMap: Map<string, Schema>) => {
-    //     const firstEntry = schemaMap.values().next().value;
-    //     return firstEntry["$schema"] ?? "";
-    // };
+    private getSchemaVersion = (schemaMap: Map<string, Schema>) => {
+        const firstEntry = schemaMap.values().next().value;
+        return firstEntry["$schema"] ?? "";
+    };
 
     private ensureOutputPathExists = () => {
         if (!fs.existsSync(this.outputPath)) {
@@ -113,27 +113,25 @@ export class SchemaGenerator {
     };
 
     private writeSchemaMapToValidationSchema = (schemaMap: Map<string, Schema>) => {
-        // const definitions: { [id: string]: Schema } = {};
-        this.ensureOutputPathExists();
-        schemaMap.forEach((fileSchema, file) => {
-            // const defs = fileSchema.definitions ?? {};
-            const output = path.join(this.outputPath, `${path.basename(file)}.json`);
-            fs.writeFileSync(output, JSON.stringify(fileSchema, null, 4));
+        const definitions: { [id: string]: Schema } = {};
+        schemaMap.forEach((fileSchema) => {
+            const defs = fileSchema.definitions ?? {};
 
-            // Object.keys(defs).forEach((key) => {
-            //     if (definitions[key] !== undefined) {
-            //         throw new Error(`Duplicate symbol: ${key} found`);
-            //     }
-            //     const schema = defs[key] as Schema;
-            //     definitions[key] = schema;
-            // });
+            Object.keys(defs).forEach((key) => {
+                if (definitions[key] !== undefined) {
+                    throw new Error(`Duplicate symbol: ${key} found`);
+                }
+                const schema = defs[key] as Schema;
+                definitions[key] = schema;
+            });
         });
-        // const outputBuffer: Schema = {
-        //     $schema: this.getSchemaVersion(schemaMap),
-        //     definitions,
-        // };
+        const outputBuffer: Schema = {
+            $schema: this.getSchemaVersion(schemaMap),
+            definitions,
+        };
 
-        // fs.writeFileSync(this.jsonSchemaOutputFile, JSON.stringify(outputBuffer, null, 4));
+        this.ensureOutputPathExists();
+        fs.writeFileSync(this.jsonSchemaOutputFile, JSON.stringify(outputBuffer, null, 4));
     };
 
     private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, Schema>) => {
