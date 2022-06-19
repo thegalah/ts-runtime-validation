@@ -11,20 +11,24 @@ const cleanupTestOutput = () => {
     }
 };
 
-beforeAll(cleanupTestOutput);
-afterAll(cleanupTestOutput);
+const getGeneratorConfig = (scenarioPath: string) => {
+    const options: ICommandOptions = {
+        glob: "*.jsonschema.ts",
+        rootPath: path.resolve(__dirname, `./test/${scenarioPath}`),
+        output: "../output",
+        helpers: false,
+        additionalProperties: false,
+        tsconfigPath: "",
+    };
+    return options;
+};
+
+beforeEach(cleanupTestOutput);
+// afterAll(cleanupTestOutput);
 
 describe("SchemaGenerator", () => {
     test("it should do stuff", async () => {
-        const options: ICommandOptions = {
-            glob: "*.jsonschema.ts",
-            rootPath: path.resolve(__dirname, "./test/basic-scenario"),
-            output: "../output",
-            helpers: false,
-            additionalProperties: false,
-            tsconfigPath: "",
-        };
-        // expect(__dirname).toStrictEqual(true);
+        const options = getGeneratorConfig("basic-scenario");
         const generator = new SchemaGenerator(options);
         await generator.Generate();
         expect(true).toStrictEqual(true);
