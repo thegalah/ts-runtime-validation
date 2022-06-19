@@ -16,6 +16,7 @@ import {
 } from "ts-morph";
 import * as tsj from "ts-json-schema-generator";
 import { Config, Schema } from "ts-json-schema-generator";
+import assert from "assert";
 
 const defaultTsMorphProjectSettings: ProjectOptions = {
     manipulationSettings: {
@@ -119,7 +120,18 @@ export class SchemaGenerator {
 
             Object.keys(defs).forEach((key) => {
                 if (definitions[key] !== undefined) {
-                    throw new Error(`Duplicate symbol: ${key} found`);
+                    try {
+                        assert.deepEqual(definitions[key], defs[key]);
+                    } catch (e) {
+                        console.error(
+                            `Duplicate symbol: ${key} found with varying definitions.\nDefinition 1:\n${JSON.stringify(
+                                definitions[key],
+                                null,
+                                4
+                            )}\nDefinition 2:\n${JSON.stringify(defs[key], null, 4)}`
+                        );
+                        throw e;
+                    }
                 }
                 const schema = defs[key] as Schema;
                 definitions[key] = schema;
