@@ -7,7 +7,7 @@ describe("SchemaGenerator", () => {
         const options: ICommandOptions = {
             glob: "*.jsonschema.ts",
             rootPath: path.resolve(__dirname, "./test/basic-scenario"),
-            output: "./validation-types",
+            output: "../output",
             helpers: false,
             additionalProperties: false,
             tsconfigPath: "",
