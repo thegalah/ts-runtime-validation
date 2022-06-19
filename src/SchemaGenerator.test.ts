@@ -7,7 +7,7 @@ const cleanupTestOutput = () => {
     const outputDir = path.resolve(__dirname, "./test/output");
     const doesDirectoryExist = fs.existsSync(outputDir);
     if (doesDirectoryExist) {
-        fs.rmdirSync(outputDir, { recursive: true });
+        fs.rmSync(outputDir);
     }
 };
 
