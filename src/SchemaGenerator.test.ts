@@ -36,7 +36,8 @@ describe("SchemaGenerator", () => {
         const options = getGeneratorConfig(scenarioPath);
         const generator = new SchemaGenerator(options);
         await generator.Generate();
-        const result = fs.readFileSync(getOutputSchemaPath(scenarioPath)).toJSON();
+        const rawFile = fs.readFileSync(getOutputSchemaPath(scenarioPath)).toString();
+        const result = JSON.parse(rawFile);
         const expected = {
             $schema: "http://json-schema.org/draft-07/schema#",
             definitions: {
