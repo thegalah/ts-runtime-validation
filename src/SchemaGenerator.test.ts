@@ -15,7 +15,7 @@ const getGeneratorConfig = (scenarioPath: string) => {
     const options: ICommandOptions = {
         glob: "*.jsonschema.ts",
         rootPath: path.resolve(__dirname, `./test/${scenarioPath}`),
-        output: "../output",
+        output: `../output/${scenarioPath}`,
         helpers: false,
         additionalProperties: false,
         tsconfigPath: "",
@@ -23,8 +23,8 @@ const getGeneratorConfig = (scenarioPath: string) => {
     return options;
 };
 
-beforeEach(cleanupTestOutput);
-// afterAll(cleanupTestOutput);
+beforeAll(cleanupTestOutput);
+afterAll(cleanupTestOutput);
 
 describe("SchemaGenerator", () => {
     test("it should generate the correct schema for a basic interface", async () => {
