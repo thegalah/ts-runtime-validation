@@ -1,4 +1,4 @@
-import fs, { readFileSync } from "fs";
+import fs from "fs";
 import path from "path";
 import { ICommandOptions } from "./index";
 import { SchemaGenerator } from "./SchemaGenerator";
@@ -23,16 +23,39 @@ const getGeneratorConfig = (scenarioPath: string) => {
     return options;
 };
 
+const getOutputSchemaPath = (scenarioPath: string) => {
+    return path.resolve(__dirname, `./test/${scenarioPath}`, "validation.schema.json");
+};
+
 beforeAll(cleanupTestOutput);
 afterAll(cleanupTestOutput);
 
 describe("SchemaGenerator", () => {
     test("it should generate the correct schema for a basic interface", async () => {
-        const options = getGeneratorConfig("basic-scenario");
+        const scenarioPath = "basic-scenario";
+        const options = getGeneratorConfig(scenarioPath);
         const generator = new SchemaGenerator(options);
         await generator.Generate();
-        // const content = readFileSync("myFile.txt");
-        expect(true).toStrictEqual(true);
+        const result = fs.readFileSync(getOutputSchemaPath(scenarioPath));
+        const expected = {
+            $schema: "http://json-schema.org/draft-07/schema#",
+            definitions: {
+                IBasicTypes: {
+                    type: "object",
+                    properties: {
+                        propertyA: {
+                            type: "string",
+                        },
+                        propertyB: {
+                            type: "string",
+                        },
+                    },
+                    required: ["propertyA", "propertyB"],
+                    additionalProperties: false,
+                },
+            },
+        };
+        expect(result).toStrictEqual(expected);
     });
 
     test("it should throw an error when there are different implementations of an interface", async () => {
