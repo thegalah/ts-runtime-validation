@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, { readFileSync } from "fs";
 import path from "path";
 import { ICommandOptions } from "./index";
 import { SchemaGenerator } from "./SchemaGenerator";
@@ -31,12 +31,19 @@ describe("SchemaGenerator", () => {
         const options = getGeneratorConfig("basic-scenario");
         const generator = new SchemaGenerator(options);
         await generator.Generate();
+        // const content = readFileSync("myFile.txt");
         expect(true).toStrictEqual(true);
     });
 
-    test("it should generate a schema with duplicate exports", async () => {
-        const options = getGeneratorConfig("duplicate-symbols-diifferent-implementation");
+    test("it should throw an error when there are different implementations of an interface", async () => {
+        const options = getGeneratorConfig("duplicate-symbols-different-implementation");
         const generator = new SchemaGenerator(options);
         await expect(generator.Generate()).rejects.toThrow();
     });
+
+    // test("it should not an error when there are identical definitions interface", async () => {
+    //     const options = getGeneratorConfig("duplicate-symbols-different-implementation");
+    //     const generator = new SchemaGenerator(options);
+    //     await expect(generator.Generate()).rejects.toThrow();
+    // });
 });
