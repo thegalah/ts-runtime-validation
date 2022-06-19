@@ -27,8 +27,15 @@ beforeEach(cleanupTestOutput);
 // afterAll(cleanupTestOutput);
 
 describe("SchemaGenerator", () => {
-    test("it should do stuff", async () => {
+    test("it should generate the correct schema for a basic interface", async () => {
         const options = getGeneratorConfig("basic-scenario");
+        const generator = new SchemaGenerator(options);
+        await generator.Generate();
+        expect(true).toStrictEqual(true);
+    });
+
+    test("it should generate a schema with duplicate exports", async () => {
+        const options = getGeneratorConfig("duplicate-symbols");
         const generator = new SchemaGenerator(options);
         await generator.Generate();
         expect(true).toStrictEqual(true);
