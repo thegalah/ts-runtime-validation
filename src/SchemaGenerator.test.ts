@@ -28,7 +28,7 @@ const getOutputSchemaPath = (scenarioPath: string) => {
 };
 
 beforeAll(cleanupTestOutput);
-// afterAll(cleanupTestOutput);
+afterAll(cleanupTestOutput);
 
 describe("SchemaGenerator", () => {
     test("it should generate the correct schema for a basic interface", async () => {
