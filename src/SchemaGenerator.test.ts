@@ -16,7 +16,7 @@ const getGeneratorConfig = (scenarioPath: string) => {
         glob: "*.jsonschema.ts",
         rootPath: path.resolve(__dirname, `./test/${scenarioPath}`),
         output: `../output/${scenarioPath}`,
-        helpers: false,
+        helpers: true,
         additionalProperties: false,
         tsconfigPath: "",
     };

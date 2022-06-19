@@ -16,7 +16,7 @@
     "scripts": {
         "build": "tsc",
         "prettier": "prettier --write \"{src,web,.scripts}/**/*.{js,jsx,ts,tsx}\" \"*.{js,json,md,yml,yaml}\"",
-        "test": "jest --silent --runInBand"
+        "test": "jest --silent"
     },
     "devDependencies": {
         "@types/jest": "^28.1.2",
