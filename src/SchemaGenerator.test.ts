@@ -75,14 +75,37 @@ describe("SchemaGenerator", () => {
         const expected = {
             $schema: "http://json-schema.org/draft-07/schema#",
             definitions: {
-                IBasicTypes: {
+                IBasicTypesA: {
                     type: "object",
                     properties: {
                         propertyA: {
-                            type: "string",
+                            $ref: "#/definitions/IBaseType",
                         },
                         propertyB: {
+                            $ref: "#/definitions/IBaseType",
+                        },
+                    },
+                    required: ["propertyA", "propertyB"],
+                    additionalProperties: false,
+                },
+                IBaseType: {
+                    type: "object",
+                    properties: {
+                        someProperty: {
                             type: "string",
+                        },
+                    },
+                    required: ["someProperty"],
+                    additionalProperties: false,
+                },
+                IBasicTypesB: {
+                    type: "object",
+                    properties: {
+                        propertyA: {
+                            $ref: "#/definitions/IBaseType",
+                        },
+                        propertyB: {
+                            $ref: "#/definitions/IBaseType",
                         },
                     },
                     required: ["propertyA", "propertyB"],
