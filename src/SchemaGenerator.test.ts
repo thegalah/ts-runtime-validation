@@ -24,7 +24,7 @@ const getGeneratorConfig = (scenarioPath: string) => {
 };
 
 const getOutputSchemaPath = (scenarioPath: string) => {
-    return path.resolve(__dirname, `./test/${scenarioPath}`, "validation.schema.json");
+    return path.resolve(__dirname, `./test/output/${scenarioPath}`, "validation.schema.json");
 };
 
 beforeAll(cleanupTestOutput);
@@ -36,7 +36,7 @@ describe("SchemaGenerator", () => {
         const options = getGeneratorConfig(scenarioPath);
         const generator = new SchemaGenerator(options);
         await generator.Generate();
-        const result = fs.readFileSync(getOutputSchemaPath(scenarioPath));
+        const result = fs.readFileSync(getOutputSchemaPath(scenarioPath)).toString();
         const expected = {
             $schema: "http://json-schema.org/draft-07/schema#",
             definitions: {
