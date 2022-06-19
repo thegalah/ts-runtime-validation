@@ -1,6 +1,4 @@
-interface IBaseType {
-    readonly someProperty: string;
-}
+import { IBaseType } from "./IBaseType";
 
 export interface IBasicTypes {
     readonly propertyA: IBaseType;
