@@ -35,9 +35,8 @@ describe("SchemaGenerator", () => {
     });
 
     test("it should generate a schema with duplicate exports", async () => {
-        const options = getGeneratorConfig("duplicate-symbols");
+        const options = getGeneratorConfig("duplicate-symbols-diifferent-implementation");
         const generator = new SchemaGenerator(options);
-        await generator.Generate();
-        expect(true).toStrictEqual(true);
+        await expect(generator.Generate()).rejects.toThrow();
     });
 });
