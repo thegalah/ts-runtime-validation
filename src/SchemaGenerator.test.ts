@@ -5,7 +5,10 @@ import { SchemaGenerator } from "./SchemaGenerator";
 
 const cleanupTestOutput = () => {
     const outputDir = path.resolve(__dirname, "./test/output");
-    fs.rmdirSync(outputDir, { recursive: true });
+    const doesDirectoryExist = fs.existsSync(outputDir);
+    if (doesDirectoryExist) {
+        fs.rmdirSync(outputDir, { recursive: true });
+    }
 };
 
 beforeAll(cleanupTestOutput);
