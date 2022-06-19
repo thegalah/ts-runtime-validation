@@ -28,7 +28,7 @@ const getOutputSchemaPath = (scenarioPath: string) => {
 };
 
 beforeAll(cleanupTestOutput);
-afterAll(cleanupTestOutput);
+// afterAll(cleanupTestOutput);
 
 describe("SchemaGenerator", () => {
     test("it should generate the correct schema for a basic interface", async () => {
@@ -65,9 +65,31 @@ describe("SchemaGenerator", () => {
         await expect(generator.Generate()).rejects.toThrow();
     });
 
-    // test("it should not an error when there are identical definitions interface", async () => {
-    //     const options = getGeneratorConfig("duplicate-symbols-different-implementation");
-    //     const generator = new SchemaGenerator(options);
-    //     await expect(generator.Generate()).rejects.toThrow();
-    // });
+    test("it should not an error when there are identical definitions interface", async () => {
+        const scenarioPath = "duplicate-symbols-identitcal-implementation";
+        const options = getGeneratorConfig(scenarioPath);
+        const generator = new SchemaGenerator(options);
+        await generator.Generate();
+        const rawFile = fs.readFileSync(getOutputSchemaPath(scenarioPath)).toString();
+        const result = JSON.parse(rawFile);
+        const expected = {
+            $schema: "http://json-schema.org/draft-07/schema#",
+            definitions: {
+                IBasicTypes: {
+                    type: "object",
+                    properties: {
+                        propertyA: {
+                            type: "string",
+                        },
+                        propertyB: {
+                            type: "string",
+                        },
+                    },
+                    required: ["propertyA", "propertyB"],
+                    additionalProperties: false,
+                },
+            },
+        };
+        expect(result).toStrictEqual(expected);
+    });
 });
