@@ -34,11 +34,13 @@ const defaultCreateFileOptions: SourceFileCreateOptions = {
 
 const validationSchemaFileName = "validation.schema.json";
 const schemaDefinitionFileName = "SchemaDefinition.ts";
+const validationInterfacesFile = "ValidationInterfaces.ts";
 
 export class SchemaGenerator {
     private outputPath = path.join(this.options.rootPath, this.options.output);
     private jsonSchemaOutputFile = path.join(this.options.rootPath, this.options.output, validationSchemaFileName);
     private tsSchemaDefinitionOutputFile = path.join(this.options.rootPath, this.options.output, schemaDefinitionFileName);
+    private validationInterfacesFileOutputFile = path.join(this.options.rootPath, this.options.output, validationInterfacesFile);
     private isValidSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "isValidSchema.ts");
 
     public constructor(private options: ICommandOptions) {}
@@ -65,6 +67,7 @@ export class SchemaGenerator {
         }
         await this.writeSchemaMapToValidationTypes(fileSchemas);
         this.writeValidatorFunction();
+        this.writeValidationInterfaces(fileSchemas);
     };
 
     private getMatchingFiles = async () => {
@@ -249,6 +252,71 @@ export class SchemaGenerator {
                 },
             ],
         });
+        await project.save();
+    };
+
+    private writeValidationInterfaces = async (schemaMap: Map<string, Schema>) => {
+        const project = new Project(defaultTsMorphProjectSettings);
+        const readerProject = new Project(defaultTsMorphProjectSettings);
+
+        const symbols: Array<string> = [];
+
+        const importMap = new Map<string, Array<string>>();
+        schemaMap.forEach((schema, filePath) => {
+            const dir = path.dirname(filePath);
+            const fileWithoutExtension = path.parse(filePath).name;
+            const relativeFilePath = path.relative(this.outputPath, dir);
+            const importPath = `${relativeFilePath}/${fileWithoutExtension}`;
+            const defs = schema.definitions ?? {};
+
+            const readerSourceFile = readerProject.addSourceFileAtPath(filePath);
+
+            Object.keys(defs).forEach((symbol) => {
+                const typeAlias = readerSourceFile.getTypeAlias(symbol);
+                const typeInterface = readerSourceFile.getInterface(symbol);
+                const hasTypeOrInterface = (typeAlias ?? typeInterface) !== undefined;
+                if (hasTypeOrInterface) {
+                    const namedImports = importMap.get(importPath) ?? [];
+                    namedImports.push(symbol);
+                    importMap.set(importPath, namedImports);
+                    symbols.push(symbol);
+                }
+            });
+        });
+
+        const sourceFile = project.createSourceFile(this.validationInterfacesFileOutputFile, {}, defaultCreateFileOptions);
+
+        importMap.forEach((namedImports, importPath) => {
+            sourceFile.addImportDeclaration({ namedImports, moduleSpecifier: importPath });
+        });
+
+        sourceFile.addVariableStatement({
+            isExported: true,
+            declarationKind: VariableDeclarationKind.Const,
+            declarations: [
+                {
+                    name: "schemas",
+                    type: "Record<keyof ISchema, string>",
+                    initializer: (writer: CodeBlockWriter) => {
+                        writer.writeLine(`{`);
+                        symbols.forEach((symbol) => {
+                            writer.writeLine(`["#/definitions/${symbol}"] : "${symbol}",`);
+                        }),
+                            writer.writeLine(`}`);
+                    },
+                },
+            ],
+        });
+
+        sourceFile.addInterface({
+            kind: StructureKind.Interface,
+            name: "ISchema",
+            isExported: true,
+            properties: symbols.map((symbol) => {
+                return { name: `readonly ["#/definitions/${symbol}"]`, type: symbol };
+            }),
+        });
+
         await project.save();
     };
 }
