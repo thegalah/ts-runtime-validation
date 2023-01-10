@@ -34,7 +34,7 @@ const defaultCreateFileOptions: SourceFileCreateOptions = {
 
 const validationSchemaFileName = "validation.schema.json";
 const schemaDefinitionFileName = "SchemaDefinition.ts";
-const validationInterfacesFile = "ValidationTypes.ts";
+const validationInterfacesFile = "ValidationType.ts";
 
 export class SchemaGenerator {
     private outputPath = path.join(this.options.rootPath, this.options.output);
