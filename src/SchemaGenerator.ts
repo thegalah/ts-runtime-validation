@@ -292,7 +292,7 @@ export class SchemaGenerator {
 
         sourceFile.addInterface({
             kind: StructureKind.Interface,
-            name: "ISchema",
+            name: "ValidationInterfaces",
             isExported: true,
             properties: symbols.map((symbol) => {
                 return { name: `readonly ["#/definitions/${symbol}"]`, type: symbol };
