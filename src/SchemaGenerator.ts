@@ -67,6 +67,7 @@ export class SchemaGenerator {
         }
         await this.writeSchemaMapToValidationTypes(fileSchemas);
         this.writeValidatorFunction();
+        console.log("Writing validation types file");
         this.writeValidationTypes(fileSchemas);
     };
 
