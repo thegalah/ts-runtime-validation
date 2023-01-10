@@ -54,7 +54,7 @@ The intended use for ts-runtime-validation is as a npm script. Here it can also 
         "generate-types": "ts-runtime-validation"
     },
     "devDependencies": {
-        "ts-runtime-validation": "^1.2.0"
+        "ts-runtime-validation": "^1.4.1"
     }
 }
 ```
