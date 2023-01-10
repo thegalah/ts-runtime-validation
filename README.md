@@ -11,6 +11,7 @@ This is a code generator that is designed to run as a yarn / npm script. By defa
 1. `./src/ts-runtime-validation/validation.schema.json` - containing the [jsonschema](http://json-schema.org/) types
 1. `./src/SchemaDefinition.ts` - containing the typescript.
 1. `./src/isValidSchema.ts` - containing a type guard type inferring helper method (intended for consumption in your code base - examples below)
+1. `./src/ValidationType.ts` - containing an exported namespace containing every single exported validation type
 
 ## Footnote
 
@@ -53,7 +54,7 @@ The intended use for ts-runtime-validation is as a npm script. Here it can also 
         "generate-types": "ts-runtime-validation"
     },
     "devDependencies": {
-        "ts-runtime-validation": "^1.2.0"
+        "ts-runtime-validation": "^1.4.1"
     }
 }
 ```
