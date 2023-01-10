@@ -290,24 +290,6 @@ export class SchemaGenerator {
             sourceFile.addImportDeclaration({ namedImports, moduleSpecifier: importPath });
         });
 
-        sourceFile.addVariableStatement({
-            isExported: true,
-            declarationKind: VariableDeclarationKind.Const,
-            declarations: [
-                {
-                    name: "schemas",
-                    type: "Record<keyof ISchema, string>",
-                    initializer: (writer: CodeBlockWriter) => {
-                        writer.writeLine(`{`);
-                        symbols.forEach((symbol) => {
-                            writer.writeLine(`["#/definitions/${symbol}"] : "${symbol}",`);
-                        }),
-                            writer.writeLine(`}`);
-                    },
-                },
-            ],
-        });
-
         sourceFile.addInterface({
             kind: StructureKind.Interface,
             name: "ISchema",
