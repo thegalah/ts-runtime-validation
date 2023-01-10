@@ -34,13 +34,13 @@ const defaultCreateFileOptions: SourceFileCreateOptions = {
 
 const validationSchemaFileName = "validation.schema.json";
 const schemaDefinitionFileName = "SchemaDefinition.ts";
-const validationInterfacesFile = "ValidationInterfaces.ts";
+const validationInterfacesFile = "ValidationTypes.ts";
 
 export class SchemaGenerator {
     private outputPath = path.join(this.options.rootPath, this.options.output);
     private jsonSchemaOutputFile = path.join(this.options.rootPath, this.options.output, validationSchemaFileName);
     private tsSchemaDefinitionOutputFile = path.join(this.options.rootPath, this.options.output, schemaDefinitionFileName);
-    private validationInterfacesFileOutputFile = path.join(this.options.rootPath, this.options.output, validationInterfacesFile);
+    private validationTypesOutputFile = path.join(this.options.rootPath, this.options.output, validationInterfacesFile);
     private isValidSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "isValidSchema.ts");
 
     public constructor(private options: ICommandOptions) {}
@@ -67,7 +67,7 @@ export class SchemaGenerator {
         }
         await this.writeSchemaMapToValidationTypes(fileSchemas);
         this.writeValidatorFunction();
-        this.writeValidationInterfaces(fileSchemas);
+        this.writeValidationTypes(fileSchemas);
     };
 
     private getMatchingFiles = async () => {
@@ -255,7 +255,7 @@ export class SchemaGenerator {
         await project.save();
     };
 
-    private writeValidationInterfaces = async (schemaMap: Map<string, Schema>) => {
+    private writeValidationTypes = async (schemaMap: Map<string, Schema>) => {
         const project = new Project(defaultTsMorphProjectSettings);
         const readerProject = new Project(defaultTsMorphProjectSettings);
 
@@ -284,19 +284,27 @@ export class SchemaGenerator {
             });
         });
 
-        const sourceFile = project.createSourceFile(this.validationInterfacesFileOutputFile, {}, defaultCreateFileOptions);
+        const sourceFile = project.createSourceFile(this.validationTypesOutputFile, {}, defaultCreateFileOptions);
 
         importMap.forEach((namedImports, importPath) => {
-            sourceFile.addImportDeclaration({ namedImports, moduleSpecifier: importPath });
+            const declaration = sourceFile.addImportDeclaration({ moduleSpecifier: importPath });
+            namedImports.forEach((namedImport) => {
+                const name = namedImport.valueOf();
+                const alias = `_${name}`;
+                declaration.addNamedImport({ name, alias });
+            });
+        });
+        const namespace = sourceFile.addModule({
+            name: "ValidationType",
+            isExported: true,
         });
 
-        sourceFile.addInterface({
-            kind: StructureKind.Interface,
-            name: "ValidationInterfaces",
-            isExported: true,
-            properties: symbols.map((symbol) => {
-                return { name: `readonly ["#/definitions/${symbol}"]`, type: symbol };
-            }),
+        importMap.forEach((namedImports) => {
+            namedImports.forEach((namedImport) => {
+                const name = namedImport.valueOf();
+                const alias = `_${name}`;
+                namespace.addTypeAlias({ name, type: alias, isExported: true });
+            });
         });
 
         await project.save();
