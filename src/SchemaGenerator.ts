@@ -89,7 +89,8 @@ export class SchemaGenerator {
         const { additionalProperties, tsconfigPath } = this.options;
         const schemaMap = new Map<string, Schema>();
         const tsconfig = tsconfigPath.length > 0 ? tsconfigPath : undefined;
-        filesList.forEach((file) => {
+        filesList.forEach((file, index) => {
+            console.log(`\rProcessing file ${index + 1} of ${filesList.length}: ${file}`);
             const config: Config = {
                 path: file,
                 type: "*",
