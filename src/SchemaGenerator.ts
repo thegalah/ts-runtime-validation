@@ -49,25 +49,25 @@ export class SchemaGenerator {
         const { helpers, glob } = this.options;
         const fileList = await this.getMatchingFiles();
 
-        console.log(`Found ${fileList.length} schema file(s)`);
+        process.stdout.write(`Found ${fileList.length} schema file(s)`);
         if (fileList.length === 0) {
-            console.log(`Aborting - no files found with glob: ${glob}`);
+            process.stdout.write(`Aborting - no files found with glob: ${glob}`);
             return;
         }
         const fileSchemas = await this.getJsonSchemasForFiles(fileList);
 
         if (fileSchemas.size === 0) {
-            console.log(`Aborting - no types found: ${glob}`);
+            process.stdout.write(`Aborting - no types found: ${glob}`);
             return;
         }
         this.writeSchemaMapToValidationSchema(fileSchemas);
         if (helpers === false) {
-            console.log("Skipping helper file generation");
+            process.stdout.write("Skipping helper file generation");
             return;
         }
         await this.writeSchemaMapToValidationTypes(fileSchemas);
         this.writeValidatorFunction();
-        console.log("Writing validation types file");
+        process.stdout.write("Writing validation types file");
         this.writeValidationTypes(fileSchemas);
     };
 
@@ -90,7 +90,7 @@ export class SchemaGenerator {
         const schemaMap = new Map<string, Schema>();
         const tsconfig = tsconfigPath.length > 0 ? tsconfigPath : undefined;
         filesList.forEach((file, index) => {
-            console.log(`\rProcessing file ${index + 1} of ${filesList.length}: ${file}`);
+            process.stdout.write(`\rProcessing file ${index + 1} of ${filesList.length}: ${file}`);
             const config: Config = {
                 path: file,
                 type: "*",
