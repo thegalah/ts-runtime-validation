@@ -270,7 +270,7 @@ export class SchemaGenerator {
             const dir = path.dirname(filePath);
             const fileWithoutExtension = path.parse(filePath).name;
             const relativeFilePath = path.relative(this.outputPath, dir);
-            const importPath = `${relativeFilePath}/${fileWithoutExtension}`;
+            const relativeImportPath = `${relativeFilePath}/${fileWithoutExtension}`;
             const defs = schema.definitions ?? {};
 
             const readerSourceFile = readerProject.addSourceFileAtPath(filePath);
@@ -280,9 +280,9 @@ export class SchemaGenerator {
                 const typeInterface = readerSourceFile.getInterface(symbol);
                 const hasTypeOrInterface = (typeAlias ?? typeInterface) !== undefined;
                 if (hasTypeOrInterface) {
-                    const namedImports = importMap.get(importPath) ?? [];
+                    const namedImports = importMap.get(relativeImportPath) ?? [];
                     namedImports.push(symbol);
-                    importMap.set(importPath, namedImports);
+                    importMap.set(relativeImportPath, namedImports);
                     symbols.push(symbol);
                 }
             });
@@ -291,7 +291,7 @@ export class SchemaGenerator {
         const sourceFile = project.createSourceFile(this.validationTypesOutputFile, {}, defaultCreateFileOptions);
 
         importMap.forEach((namedImports, importPath) => {
-            const declaration = sourceFile.addImportDeclaration({ moduleSpecifier: importPath });
+            const declaration = sourceFile.addImportDeclaration({ moduleSpecifier: getPosixPath(importPath) });
             namedImports.forEach((namedImport) => {
                 const name = namedImport.valueOf();
                 const alias = `_${name}`;
