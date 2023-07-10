@@ -17,6 +17,7 @@ import {
 import * as tsj from "ts-json-schema-generator";
 import { Config, Schema } from "ts-json-schema-generator";
 import assert from "assert";
+import { writeLine } from "./writeLine";
 
 const defaultTsMorphProjectSettings: ProjectOptions = {
     manipulationSettings: {
@@ -51,23 +52,23 @@ export class SchemaGenerator {
 
         console.log(`Found ${fileList.length} schema file(s)`);
         if (fileList.length === 0) {
-            console.log(`Aborting - no files found with glob: ${glob}`);
+            writeLine(`Aborting - no files found with glob: ${glob}`);
             return;
         }
         const fileSchemas = await this.getJsonSchemasForFiles(fileList);
 
         if (fileSchemas.size === 0) {
-            console.log(`Aborting - no types found: ${glob}`);
+            writeLine(`Aborting - no types found: ${glob}`);
             return;
         }
         this.writeSchemaMapToValidationSchema(fileSchemas);
         if (helpers === false) {
-            console.log("Skipping helper file generation");
+            writeLine("Skipping helper file generation");
             return;
         }
         await this.writeSchemaMapToValidationTypes(fileSchemas);
         this.writeValidatorFunction();
-        console.log("Writing validation types file");
+        writeLine("Writing validation types file");
         this.writeValidationTypes(fileSchemas);
     };
 
@@ -89,7 +90,8 @@ export class SchemaGenerator {
         const { additionalProperties, tsconfigPath } = this.options;
         const schemaMap = new Map<string, Schema>();
         const tsconfig = tsconfigPath.length > 0 ? tsconfigPath : undefined;
-        filesList.forEach((file) => {
+        filesList.forEach((file, index) => {
+            writeLine(`\rProcessing file ${index + 1} of ${filesList.length}: ${file}`);
             const config: Config = {
                 path: file,
                 type: "*",

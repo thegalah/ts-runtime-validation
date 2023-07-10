@@ -13,6 +13,10 @@ This is a code generator that is designed to run as a yarn / npm script. By defa
 1. `./src/isValidSchema.ts` - containing a type guard type inferring helper method (intended for consumption in your code base - examples below)
 1. `./src/ValidationType.ts` - containing an exported namespace containing every single exported validation type
 
+## Limitations
+
+The schema generator does not allow multiple interfaces / types to share the same name.
+
 ## Footnote
 
 The helper file assumes you have [ajv-validator](https://github.com/ajv-validator/ajv) peer dependency installed. Since this is only a code generation tool this package can be installed as a dev dependency.
