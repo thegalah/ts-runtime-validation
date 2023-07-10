@@ -1,34 +1,34 @@
 # ts-runtime-validation
 
-This project is based on [vega/ts-jsonschema-generator](https://github.com/vega/ts-jsonschema-generator). It has been modified and extended to support runtime type validations from TypeScript interfaces.
+This project builds upon the [vega/ts-jsonschema-generator](https://github.com/vega/ts-jsonschema-generator) and extends its functionality to offer runtime type validations for TypeScript interfaces.
 
-## Why?
+## Overview
 
-Get bulletproof type validation based off typescript interfaces without any extra work. This package will ingest your existing types and generate the code for you.
+`ts-runtime-validation` provides robust type validation, leveraging TypeScript interfaces, without any additional work required. It ingests your existing types and automatically generates the corresponding validation code.
 
-## How?
+## How Does It Work?
 
-This is a code generator that is designed to run as a yarn / npm script. By default scans your source directory for files ending in the provided glob pattern. It will generate types based off exported type aliases and typescript interfaces. By default: `*.jsonschema.{ts,tsx}`. The output will create three files:
+This package operates as a code generator, which can be run as a script via npm or yarn. By default, it scans your source directory for files ending with the provided glob pattern and generates types based on exported type aliases and TypeScript interfaces. By default, it looks for: `*.jsonschema.{ts,tsx}`. The output includes three files:
 
-1. `./src/ts-runtime-validation/validation.schema.json` - containing the [jsonschema](http://json-schema.org/) types
-1. `./src/SchemaDefinition.ts` - containing the typescript.
-1. `./src/isValidSchema.ts` - containing a type guard type inferring helper method (intended for consumption in your code base - examples below)
-1. `./src/ValidationType.ts` - containing an exported namespace containing every single exported validation type
+1. `./src/ts-runtime-validation/validation.schema.json` - Contains the JSONSchema types.
+2. `./src/SchemaDefinition.ts` - Contains the TypeScript definitions.
+3. `./src/isValidSchema.ts` - Contains a type guard helper method with type inference (designed for consumption in your code base with examples provided below).
+4. `./src/ValidationType.ts` - Contains an exported namespace encapsulating every exported validation type.
 
 ## Limitations
 
-The schema generator does not allow multiple interfaces / types to share the same name.
+Please note that the schema generator does not support multiple interfaces/types sharing the same name.
 
-## Footnote
+## Dependency Requirement
 
-The helper file assumes you have [ajv-validator](https://github.com/ajv-validator/ajv) peer dependency installed. Since this is only a code generation tool this package can be installed as a dev dependency.
+The helper file assumes you have the [ajv-validator](https://github.com/ajv-validator/ajv) installed as a peer dependency. Since `ts-runtime-validation` is purely a code generation tool, it can be installed as a dev dependency.
 
 ## Installation
 
 ```bash
-# yarn
+# With yarn
 yarn add --dev ts-runtime-validation
-# npm
+# With npm
 npm install --dev ts-runtime-validation
 ```
 
