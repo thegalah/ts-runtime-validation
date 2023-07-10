@@ -29,7 +29,7 @@
         "typescript": "^5.1.6"
     },
     "description": "A set of tools to generate json-schema validations from typescript interface(s) and methods to validate unknown data at runtime against them",
-    "main": "index.js",
+    "main": "dist/index.js",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/thegalah/ts-runtime-validation.git"
