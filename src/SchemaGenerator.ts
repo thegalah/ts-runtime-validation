@@ -74,7 +74,7 @@ export class SchemaGenerator {
 
     private getMatchingFiles = async () => {
         const { glob, rootPath } = this.options;
-        const api = new fdir().crawlWithOptions(rootPath, {
+        const api = new fdir({
             includeBasePath: true,
             includeDirs: false,
             filters: [
@@ -82,7 +82,7 @@ export class SchemaGenerator {
                     return picomatch.isMatch(path, glob, { contains: true });
                 },
             ],
-        });
+        }).crawl(rootPath);
         return api.withPromise() as Promise<Array<string>>;
     };
 
