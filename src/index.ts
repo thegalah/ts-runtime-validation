@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { ICommandOptions } from "./ICommandOptions";
 import { SchemaGenerator } from "./SchemaGenerator";
 import { program } from "commander";
 
@@ -8,15 +9,6 @@ const defaultGlobPattern = "*.jsonschema.{ts,tsx}";
 const defaultRootPath = "./src";
 const defaultOutputFolder = "./.ts-runtime-validation";
 const defaultTsconfig = "";
-
-export interface ICommandOptions {
-    readonly glob: string;
-    readonly rootPath: string;
-    readonly output: string;
-    readonly helpers: boolean;
-    readonly additionalProperties: boolean;
-    readonly tsconfigPath: string;
-}
 
 program.option(
     "--glob",
