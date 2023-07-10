@@ -1,5 +1,7 @@
 # ts-runtime-validation
 
+This project is based on [vega/ts-jsonschema-generator](https://github.com/vega/ts-jsonschema-generator). It has been modified and extended to support runtime type validations from TypeScript interfaces.
+
 ## Why?
 
 Get bulletproof type validation based off typescript interfaces without any extra work. This package will ingest your existing types and generate the code for you.
