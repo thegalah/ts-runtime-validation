@@ -83,7 +83,7 @@ export class SchemaGenerator {
                 },
             ],
         }).crawl(rootPath);
-        return api.withPromise() as Promise<Array<string>>;
+        return api.withPromise();
     };
 
     private getJsonSchemasForFiles = async (filesList: Array<string>) => {
