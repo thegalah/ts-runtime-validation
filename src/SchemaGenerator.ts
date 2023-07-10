@@ -18,6 +18,7 @@ import * as tsj from "ts-json-schema-generator";
 import { Config, Schema } from "ts-json-schema-generator";
 import assert from "assert";
 import { writeLine } from "./writeLine";
+import { getPosixPath } from "./getPosixPath";
 
 const defaultTsMorphProjectSettings: ProjectOptions = {
     manipulationSettings: {
@@ -163,7 +164,7 @@ export class SchemaGenerator {
             const dir = path.dirname(filePath);
             const fileWithoutExtension = path.parse(filePath).name;
             const relativeFilePath = path.relative(this.outputPath, dir);
-            const importPath = `${relativeFilePath}/${fileWithoutExtension}`;
+            const relativeImportPath = `${relativeFilePath}/${fileWithoutExtension}`;
             const defs = schema.definitions ?? {};
 
             const readerSourceFile = readerProject.addSourceFileAtPath(filePath);
@@ -173,9 +174,9 @@ export class SchemaGenerator {
                 const typeInterface = readerSourceFile.getInterface(symbol);
                 const hasTypeOrInterface = (typeAlias ?? typeInterface) !== undefined;
                 if (hasTypeOrInterface) {
-                    const namedImports = importMap.get(importPath) ?? [];
+                    const namedImports = importMap.get(relativeImportPath) ?? [];
                     namedImports.push(symbol);
-                    importMap.set(importPath, namedImports);
+                    importMap.set(relativeImportPath, namedImports);
                     symbols.push(symbol);
                 }
             });
@@ -184,7 +185,7 @@ export class SchemaGenerator {
         const sourceFile = project.createSourceFile(this.tsSchemaDefinitionOutputFile, {}, defaultCreateFileOptions);
 
         importMap.forEach((namedImports, importPath) => {
-            sourceFile.addImportDeclaration({ namedImports, moduleSpecifier: importPath });
+            sourceFile.addImportDeclaration({ namedImports, moduleSpecifier: getPosixPath(importPath) });
         });
 
         sourceFile.addVariableStatement({
