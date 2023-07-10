@@ -1,10 +1,10 @@
 import fs from "fs";
 import path from "path";
-import { ICommandOptions } from "./index";
+import { ICommandOptions } from "./ICommandOptions";
 import { SchemaGenerator } from "./SchemaGenerator";
 
 const cleanupTestOutput = () => {
-    const outputDir = path.resolve(__dirname, "./test/output");
+    const outputDir = path.posix.resolve(__dirname, "./test/output");
     const doesDirectoryExist = fs.existsSync(outputDir);
     if (doesDirectoryExist) {
         fs.rmSync(outputDir, { recursive: true });

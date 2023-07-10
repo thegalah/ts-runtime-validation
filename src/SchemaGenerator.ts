@@ -1,5 +1,5 @@
 import { fdir } from "fdir";
-import { ICommandOptions } from "./index";
+import { ICommandOptions } from "./ICommandOptions";
 import fs from "fs";
 import picomatch from "picomatch";
 import path from "path";
