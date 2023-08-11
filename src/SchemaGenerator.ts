@@ -1,24 +1,23 @@
 import { fdir } from "fdir";
-import { ICommandOptions } from "./ICommandOptions";
 import fs from "fs";
-import picomatch from "picomatch";
 import path from "path";
-import {
-    Project,
-    IndentationText,
-    NewLineKind,
-    QuoteKind,
-    StructureKind,
-    VariableDeclarationKind,
-    CodeBlockWriter,
-    ProjectOptions,
-    SourceFileCreateOptions,
-} from "ts-morph";
+import picomatch from "picomatch";
 import * as tsj from "ts-json-schema-generator";
 import { Config, Schema } from "ts-json-schema-generator";
-import assert from "assert";
-import { writeLine } from "./writeLine";
+import {
+    CodeBlockWriter,
+    IndentationText,
+    NewLineKind,
+    Project,
+    ProjectOptions,
+    QuoteKind,
+    SourceFileCreateOptions,
+    StructureKind,
+    VariableDeclarationKind,
+} from "ts-morph";
+import { ICommandOptions } from "./ICommandOptions";
 import { getPosixPath } from "./getPosixPath";
+import { writeLine } from "./writeLine";
 
 const defaultTsMorphProjectSettings: ProjectOptions = {
     manipulationSettings: {
@@ -40,7 +39,7 @@ const validationInterfacesFile = "ValidationType.ts";
 
 export class SchemaGenerator {
     private outputPath = path.join(this.options.rootPath, this.options.output);
-    private jsonSchemaOutputFile = path.join(this.options.rootPath, this.options.output, validationSchemaFileName);
+    // private jsonSchemaOutputFile = path.join(this.options.rootPath, this.options.output, validationSchemaFileName);
     private tsSchemaDefinitionOutputFile = path.join(this.options.rootPath, this.options.output, schemaDefinitionFileName);
     private validationTypesOutputFile = path.join(this.options.rootPath, this.options.output, validationInterfacesFile);
     private isValidSchemaOutputFile = path.join(this.options.rootPath, this.options.output, "isValidSchema.ts");
@@ -109,11 +108,6 @@ export class SchemaGenerator {
         return schemaMap;
     };
 
-    private getSchemaVersion = (schemaMap: Map<string, Schema>) => {
-        const firstEntry = schemaMap.values().next().value;
-        return firstEntry["$schema"] ?? "";
-    };
-
     private ensureOutputPathExists = () => {
         if (!fs.existsSync(this.outputPath)) {
             fs.mkdirSync(this.outputPath, { recursive: true });
@@ -121,36 +115,18 @@ export class SchemaGenerator {
     };
 
     private writeSchemaMapToValidationSchema = (schemaMap: Map<string, Schema>) => {
-        const definitions: { [id: string]: Schema } = {};
-        schemaMap.forEach((fileSchema) => {
-            const defs = fileSchema.definitions ?? {};
-
-            Object.keys(defs).forEach((key) => {
-                if (definitions[key] !== undefined) {
-                    try {
-                        assert.deepEqual(definitions[key], defs[key]);
-                    } catch (e) {
-                        console.error(
-                            `Duplicate symbol: ${key} found with varying definitions.\nDefinition 1:\n${JSON.stringify(
-                                definitions[key],
-                                null,
-                                4
-                            )}\nDefinition 2:\n${JSON.stringify(defs[key], null, 4)}`
-                        );
-                        throw e;
-                    }
-                }
-                const schema = defs[key] as Schema;
-                definitions[key] = schema;
-            });
-        });
-        const outputBuffer: Schema = {
-            $schema: this.getSchemaVersion(schemaMap),
-            definitions,
-        };
-
         this.ensureOutputPathExists();
-        fs.writeFileSync(this.jsonSchemaOutputFile, JSON.stringify(outputBuffer, null, 4));
+
+        schemaMap.forEach((fileSchema, filePath) => {
+            const dir = path.dirname(filePath);
+            const fileWithoutExtension = path.parse(filePath).name;
+            const outputFile = path.join(dir, `${fileWithoutExtension}.jsonschema.json`);
+            const outputBuffer = {
+                $schema: fileSchema["$schema"] ?? "",
+                definitions: fileSchema.definitions ?? {},
+            };
+            fs.writeFileSync(outputFile, JSON.stringify(outputBuffer, null, 4));
+        });
     };
 
     private writeSchemaMapToValidationTypes = async (schemaMap: Map<string, Schema>) => {
