@@ -33,7 +33,6 @@ const defaultCreateFileOptions: SourceFileCreateOptions = {
     overwrite: true,
 };
 
-const validationSchemaFileName = "validation.schema.json";
 const schemaDefinitionFileName = "SchemaDefinition.ts";
 const validationInterfacesFile = "ValidationType.ts";
 
@@ -197,41 +196,57 @@ export class SchemaGenerator {
     private writeValidatorFunction = async () => {
         const project = new Project(defaultTsMorphProjectSettings);
         const sourceFile = project.createSourceFile(this.isValidSchemaOutputFile, {}, defaultCreateFileOptions);
-        sourceFile.addImportDeclaration({ namespaceImport: "schema", moduleSpecifier: `./${validationSchemaFileName}` });
         sourceFile.addImportDeclaration({ defaultImport: "Ajv", moduleSpecifier: "ajv" });
         sourceFile.addImportDeclaration({
             namedImports: ["ISchema", "schemas"],
             moduleSpecifier: `./${path.parse(schemaDefinitionFileName).name}`,
         });
+
         sourceFile.addVariableStatement({
             isExported: true,
             declarationKind: VariableDeclarationKind.Const,
             declarations: [
                 {
                     name: "validator",
+                    initializer: "new Ajv({ allErrors: true })",
+                },
+            ],
+        });
+
+        sourceFile.addVariableStatement({
+            isExported: true,
+            declarationKind: VariableDeclarationKind.Const,
+            declarations: [
+                {
+                    name: "compiledSchemas",
+                    type: `Map<keyof typeof schemas, Ajv.ValidateFunction>`,
                     initializer: (writer: CodeBlockWriter) => {
-                        writer.writeLine(`new Ajv({ allErrors: true });`);
-                        writer.writeLine(`validator.compile(schema)`);
+                        writer.writeLine(
+                            "new Map<keyof typeof schemas, Ajv.ValidateFunction>(Object.entries(schemas).map(([key, schema]) => [key as keyof typeof schemas, validator.compile(schema)]))"
+                        );
                     },
                 },
             ],
         });
 
         sourceFile.addVariableStatement({
-            declarationKind: VariableDeclarationKind.Const,
             isExported: true,
+            declarationKind: VariableDeclarationKind.Const,
             declarations: [
                 {
                     name: "isValidSchema",
                     initializer: (writer: CodeBlockWriter) => {
                         writer.writeLine(`<T extends keyof typeof schemas>(data: unknown, schemaKeyRef: T): data is ISchema[T] => {`);
-                        writer.writeLine(`validator.validate(schemaKeyRef as string, data);`);
-                        writer.writeLine(`return Boolean(validator.errors) === false;`);
+                        writer.writeLine(`  const validate = compiledSchemas.get(schemaKeyRef);`);
+                        writer.writeLine(`  if (!validate) throw new Error("Schema not found");`);
+                        writer.writeLine(`  const valid = validate(data);`);
+                        writer.writeLine(`  return valid;`);
                         writer.writeLine(`}`);
                     },
                 },
             ],
         });
+
         await project.save();
     };
 
