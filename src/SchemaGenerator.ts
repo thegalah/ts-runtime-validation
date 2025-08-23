@@ -111,7 +111,7 @@ export class SchemaGenerator {
 
     private getSchemaVersion = (schemaMap: Map<string, Schema>) => {
         const firstEntry = schemaMap.values().next().value;
-        return firstEntry["$schema"] ?? "";
+        return firstEntry?.["$schema"] ?? "";
     };
 
     private ensureOutputPathExists = () => {
