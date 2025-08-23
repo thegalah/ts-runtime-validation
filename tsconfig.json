@@ -11,8 +11,7 @@
         "strict": true,
         "noImplicitAny": true,
         "noUnusedParameters": true,
-        "noUnusedLocals": true,
-        "skipLibCheck": true
+        "noUnusedLocals": true
     },
     "include": ["src/**/*.ts"],
     "exclude": ["node_modules"]
