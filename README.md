@@ -1,110 +1,291 @@
 # ts-runtime-validation
 
-## Why?
+[![npm version](https://badge.fury.io/js/ts-runtime-validation.svg)](https://www.npmjs.com/package/ts-runtime-validation)
 
-Get bulletproof type validation based off typescript interfaces without any extra work. This package will ingest your existing types and generate the code for you.
+Generate bulletproof runtime type validation from your TypeScript interfaces and type aliases. No manual schema writing, no decorators, just your existing TypeScript types.
 
-## How?
+## ✨ Features
 
-This is a code generator that is designed to run as a yarn / npm script. By default scans your source directory for files ending in the provided glob pattern. It will generate types based off exported type aliases and typescript interfaces. By default: `*.jsonschema.{ts,tsx}`. The output will create three files:
+- 🚀 **Zero-effort validation** - Automatically generates JSON Schema validators from TypeScript interfaces
+- 🔒 **Type-safe** - Full TypeScript support with type inference and type guards
+- 📦 **Lightweight** - Minimal dependencies, can be installed as a dev dependency
+- 🛠️ **CLI & Programmatic API** - Use as a CLI tool or integrate into your build process
+- 🎯 **Selective generation** - Control which types to validate using file naming conventions
+- 📝 **JSDoc annotations** - Add validation rules (min/max length, patterns, formats) directly in your TypeScript code
 
-1. `./src/ts-runtime-validation/validation.schema.json` - containing the [jsonschema](http://json-schema.org/) types
-1. `./src/SchemaDefinition.ts` - containing the typescript.
-1. `./src/isValidSchema.ts` - containing a type guard type inferring helper method (intended for consumption in your code base - examples below)
-1. `./src/ValidationType.ts` - containing an exported namespace containing every single exported validation type
+## 📋 Prerequisites
 
-## Limitations
+- Node.js >= 12
+- TypeScript >= 4.0
+- `ajv` >= 8.11.0 (peer dependency for runtime validation)
 
-The schema generator does not allow multiple interfaces / types to share the same name.
-
-## Footnote
-
-The helper file assumes you have [ajv-validator](https://github.com/ajv-validator/ajv) peer dependency installed. Since this is only a code generation tool this package can be installed as a dev dependency.
-
-## Installation
+## 📦 Installation
 
 ```bash
-# yarn
+# Using yarn (recommended)
 yarn add --dev ts-runtime-validation
-# npm
-npm install --dev ts-runtime-validation
+yarn add ajv  # Required peer dependency
+
+# Using npm
+npm install --save-dev ts-runtime-validation
+npm install ajv  # Required peer dependency
 ```
 
-## CLI usage
+## 🚀 Quick Start
 
-Ensure your project files containing the schemas you want to validate end with the prefix `.jsonschema.ts`
+### 1. Mark your types for validation
 
+Create files ending with `.jsonschema.ts` for types you want to validate:
+
+```typescript
+// user.jsonschema.ts
+export interface IUser {
+    id: string;
+    email: string;
+    name?: string;
+    age: number;
+    roles: string[];
+}
+
+export type UserRole = "admin" | "user" | "guest";
 ```
-Usage: ts-runtime-validation [options]
+
+#### JSDoc Annotations for Validation Rules
+
+You can add validation constraints using JSDoc annotations that will be converted to JSON Schema properties:
+
+```typescript
+// api.jsonschema.ts
+export interface IGetUserFormsPathParams {
+    /**
+     * User ID to get forms for
+     * @minLength 24
+     * @maxLength 24
+     * @pattern ^[a-fA-F0-9]{24}$
+     */
+    readonly userId: string;
+}
+
+export interface IProduct {
+    /**
+     * Product name
+     * @minLength 1
+     * @maxLength 100
+     */
+    name: string;
+
+    /**
+     * Product price in cents
+     * @minimum 0
+     * @maximum 1000000
+     * @multipleOf 1
+     */
+    price: number;
+
+    /**
+     * Product tags
+     * @minItems 1
+     * @maxItems 10
+     * @uniqueItems true
+     */
+    tags: string[];
+
+    /**
+     * Email for support
+     * @format email
+     */
+    supportEmail?: string;
+
+    /**
+     * Product website
+     * @format uri
+     * @pattern ^https://
+     */
+    website?: string;
+}
+```
+
+Supported JSDoc annotations include:
+
+- **Strings**: `@minLength`, `@maxLength`, `@pattern`, `@format` (email, uri, uuid, date-time, etc.)
+- **Numbers**: `@minimum`, `@maximum`, `@exclusiveMinimum`, `@exclusiveMaximum`, `@multipleOf`
+- **Arrays**: `@minItems`, `@maxItems`, `@uniqueItems`
+- **Objects**: `@minProperties`, `@maxProperties`
+- **General**: `@description`, `@default`, `@examples`
+
+### 2. Add to your package.json scripts
+
+```json
+{ "scripts": { "generate-types": "ts-runtime-validation" } }
+```
+
+### 3. Generate validators
+
+```bash
+yarn generate-types
+```
+
+### 4. Use the generated validators
+
+```typescript
+import { isValidSchema } from "./.ts-runtime-validation/isValidSchema";
+import { IUser } from "./user.jsonschema";
+
+const userData = await fetch("/api/user").then((r) => r.json());
+
+if (isValidSchema(userData, "#/definitions/IUser")) {
+    // userData is now typed as IUser
+    console.log(userData.email); // TypeScript knows this is a string
+} else {
+    console.error("Invalid user data received");
+}
+```
+
+## 📖 Usage
+
+### CLI Options
+
+```bash
+ts-runtime-validation [options]
 
 Options:
-  --glob                         Glob file path of typescript files to generate ts-interface -> json-schema validations - default: *.jsonschema.{ts,tsx}
-  --rootPath <rootFolder>        RootPath of source (default: "./src")
-  --output <outputFolder>        Code generation output directory (relative to root path) (default: "./.ts-runtime-validation")
-  --tsconfigPath <tsconfigPath>  Path to customt tsconfig (relative to root path) (default: "")
-  --generate-helpers             Only generate JSON schema without typescript helper files (default: true)
-  --additionalProperties         Allow additional properties to pass validation (default: false)
-  -h, --help                     display help for command
-Done in 0.44s.
+  --glob                         Glob pattern for schema files
+                                (default: "*.jsonschema.{ts,tsx}")
+  --rootPath <rootFolder>        Source directory root
+                                (default: "./src")
+  --output <outputFolder>        Output directory for generated files
+                                (default: "./.ts-runtime-validation")
+  --tsconfigPath <path>          Path to tsconfig.json
+                                (default: "")
+  --generate-helpers             Generate TypeScript helper files
+                                (default: true)
+  --additionalProperties         Allow additional properties in validation
+                                (default: false)
+  -h, --help                     Display help
 ```
 
-## npm script usage
+### Generated Files
 
-The intended use for ts-runtime-validation is as a npm script. Here it can also be tweaked to watch (eg. using nodemon)
+The tool generates four files in your output directory:
+
+| File                     | Description                                    |
+| ------------------------ | ---------------------------------------------- |
+| `validation.schema.json` | JSON Schema definitions for all your types     |
+| `SchemaDefinition.ts`    | TypeScript type definitions                    |
+| `isValidSchema.ts`       | Type guard helper function with type inference |
+| `ValidationType.ts`      | Namespace containing all validation types      |
+
+### Programmatic API
+
+```typescript
+import { SchemaGenerator } from "ts-runtime-validation";
+
+const generator = new SchemaGenerator({ glob: "**/*.types.ts", rootPath: "./src", output: "./validation", additionalProperties: false });
+
+generator.Generate();
+```
+
+### Watch Mode with nodemon
 
 ```json
 {
     "scripts": {
-        "generate-types": "ts-runtime-validation"
-    },
-    "devDependencies": {
-        "ts-runtime-validation": "^1.4.1"
+        "generate-types": "ts-runtime-validation",
+        "generate-types:watch": "nodemon --watch 'src/**/*.jsonschema.ts' --exec 'yarn generate-types'"
     }
 }
 ```
 
-## Example snippets
+### Custom File Patterns
 
-### Type guard
+```bash
+# Validate all .types.ts files
+ts-runtime-validation --glob "**/*.types.ts"
 
-```typescript
-import { isValidSchema } from "./.ts-runtime-validation/isValidSchema"; // this is autogenerated by the CLI as a helper file
+# Multiple patterns
+ts-runtime-validation --glob "**/*.{types,schemas}.ts"
 
-if (isValidSchema(data, "#/definitions/ITypeA")) {
-    // variable: data in this block will have typings for ITypeA
-} else {
-    // type is invalid and not known here
-    throw new Error("Failed to validate payload");
-}
+# Specific directories
+ts-runtime-validation --rootPath "./src/api" --output "./src/api/validation"
 ```
 
-### Type assertion
+## ⚠️ Limitations
 
+- **No duplicate type names** - Each interface/type must have a unique name across all schema files
+- **TypeScript-only constructs** - Some advanced TypeScript features (like conditional types) may not be fully supported
+- **Circular references** - Limited support for circular type references
+
+## 🤝 Contributing
+
+We welcome contributions! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/thegalah/ts-runtime-validation.git
+cd ts-runtime-validation
+
+# Install dependencies
+yarn install
+
+# Build the project
+yarn build
+
+# Run tests
+yarn test
+
+# Link for local development
+yarn link
 ```
-import * as schema from "../runtime-validation/validation.schema.json";
-import Ajv from "ajv";
-import { ISchema, schemas } from "../runtime-validation/SchemaDefinition";
 
-const validator = new Ajv({ allErrors: true });
-validator.compile(schema);
+## 🙏 Acknowledgments
 
-export const assertValidSchema = <T extends keyof typeof schemas>(data: unknown, schemaKeyRef: T): data is ISchema[T] => {
-    validator.validate(schemaKeyRef as string, data);
-    if (validator.errors || Boolean(validator.errors)) {
-        const error = { schemaKeyRef, errors: validator.errorsText(), data };
-        if (process.env.ENVIRONMENT === "dev") {
-            console.log(error);
-        }
-        throw new Error(JSON.stringify(error));
-    }
-    return true;
-};
-```
+Built with:
 
-## Contributing
+- [ts-json-schema-generator](https://github.com/vega/ts-json-schema-generator) - For TypeScript to JSON Schema conversion
+- [ajv](https://github.com/ajv-validator/ajv) - For JSON Schema validation
+- [ts-morph](https://github.com/dsherret/ts-morph) - For TypeScript AST manipulation
 
-Submit a PR
+## 📚 Related Projects & Comparisons
 
-## License
+### How ts-runtime-validation differs from alternatives:
 
-MIT
+| Library                                      | Approach                                                                    | When to Use                                                                                                      |
+| -------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **ts-runtime-validation**                    | Generates validators from existing TypeScript interfaces via CLI/build step | You already have TypeScript interfaces and want automatic validation without runtime dependencies or API changes |
+| **[zod](https://github.com/colinhacks/zod)** | Define schemas in code that create both types and validators                | You want to define your schema once and derive TypeScript types from it, with a runtime validation library       |
+| **[io-ts](https://github.com/gcanti/io-ts)** | Functional programming approach with codecs for encoding/decoding           | You need bidirectional transformations and prefer functional programming patterns                                |
+| **[yup](https://github.com/jquense/yup)**    | Runtime schema builder with fluent API                                      | You're working with forms/frontend validation and want a battle-tested solution with built-in error messages     |
+
+### Key Differences:
+
+**ts-runtime-validation**:
+
+- ✅ **Zero runtime API** - Works with your existing TypeScript interfaces
+- ✅ **Build-time generation** - No runtime overhead for schema creation
+- ✅ **JSDoc validation rules** - Add constraints via comments
+- ❌ **Requires build step** - Must regenerate when types change
+- ❌ **No runtime schema composition** - Can't dynamically create schemas
+
+**zod/io-ts/yup**:
+
+- ✅ **Runtime flexibility** - Create and compose schemas dynamically
+- ✅ **Single source of truth** - Schema and type defined together
+- ✅ **No build step** - Works immediately in your code
+- ❌ **Runtime overhead** - Schemas created at runtime
+- ❌ **Duplicate type definitions** - Can't reuse existing TypeScript interfaces
+
+Choose **ts-runtime-validation** when you:
+
+- Have existing TypeScript interfaces you want to validate
+- Prefer build-time code generation over runtime libraries
+- Want to keep validation rules close to your type definitions via JSDoc
+- Need minimal runtime dependencies
+
+Choose **alternatives** when you:
+
+- Want to define schemas at runtime dynamically
+- Prefer schema-first design (define validation, derive types)
+- Need complex runtime transformations or coercions
+- Want extensive built-in validation methods and error messages
