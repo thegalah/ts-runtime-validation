@@ -1,6 +1,6 @@
 {
     "name": "ts-runtime-validation",
-    "version": "1.6.16",
+    "version": "1.7.0",
     "author": "Matthew Duong <thegalah@gmail.com>",
     "license": "MIT",
     "dependencies": {
@@ -28,7 +28,7 @@
         "ts-node": "^10.9.1",
         "typescript": "^5.1.6"
     },
-    "description": "A set of tools to generate json-schema validations from typescript interface(s) and methods to validate unknown data at runtime against them",
+    "description": "High-performance TypeScript runtime validation with intelligent caching, parallel processing, and zero-effort JSON Schema generation from your existing interfaces",
     "main": "dist/lib.js",
     "repository": {
         "type": "git",
