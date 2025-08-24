@@ -50,9 +50,9 @@ export class ProgressReporter {
     private drawProgressBar(): void {
         if (!this.options.total) return;
         
-        const percentage = Math.floor((this.current / this.options.total) * 100);
+        const percentage = Math.min(100, Math.floor((this.current / this.options.total) * 100));
         const barLength = 30;
-        const filled = Math.floor((this.current / this.options.total) * barLength);
+        const filled = Math.max(0, Math.min(barLength, Math.floor((this.current / this.options.total) * barLength)));
         const bar = '█'.repeat(filled) + '░'.repeat(barLength - filled);
         
         this.clearLine();
@@ -62,7 +62,7 @@ export class ProgressReporter {
     }
     
     private clearLine(): void {
-        if (process.stdout.isTTY && process.stdout.clearLine) {
+        if (process.stdout.isTTY && process.stdout.clearLine && process.stdout.cursorTo) {
             process.stdout.clearLine(0);
             process.stdout.cursorTo(0);
         }

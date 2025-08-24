@@ -167,75 +167,6 @@ yarn link
 3. Run `yarn test` to ensure tests pass
 4. Test your changes locally using `yarn link`
 
-## Code Structure
-
-### Directory Layout
-
-```
-ts-runtime-validation/
-├── src/
-│   ├── index.ts                 # CLI entry point
-│   ├── lib.ts                   # Library exports
-│   ├── SchemaGenerator.ts       # Orchestrator class
-│   ├── SchemaGenerator.test.ts  # Generator tests
-│   ├── ICommandOptions.ts       # Configuration interface
-│   ├── services/                # Core service layer
-│   │   ├── FileDiscovery.ts     # File operations & caching
-│   │   ├── SchemaProcessor.ts   # TypeScript → JSON Schema
-│   │   ├── CodeGenerator.ts     # TypeScript file generation
-│   │   └── SchemaWriter.ts      # File writing operations
-│   ├── errors/                  # Error handling
-│   │   └── index.ts             # Custom error classes
-│   ├── utils/                   # Utilities
-│   │   └── ProgressReporter.ts  # Progress tracking
-│   ├── getPosixPath.ts          # Path utilities (legacy)
-│   ├── writeLine.ts             # Console utilities (legacy)
-│   └── test/                    # Test scenarios
-│       ├── basic-scenario/
-│       └── duplicate-symbols-*/
-├── dist/                        # Compiled JavaScript
-├── .ts-runtime-validation-cache/ # Cache directory (when enabled)
-├── package.json
-├── tsconfig.json               # TypeScript configuration
-├── jest.config.js              # Test configuration
-├── CONTRIBUTING.md             # This file
-└── README.md
-```
-
-### Key Design Patterns
-
-#### 1. Service-Oriented Architecture
-
-The SchemaGenerator orchestrates specialized services, each with a single responsibility:
-- **FileDiscovery**: File system operations
-- **SchemaProcessor**: TypeScript analysis
-- **CodeGenerator**: File generation
-- **SchemaWriter**: Output management
-
-#### 2. Dependency Injection
-
-Services are instantiated in the SchemaGenerator constructor with configuration-based options, making the system testable and modular.
-
-#### 3. Error Handling Strategy
-
-- **Custom Error Classes**: Specific errors for different failure types
-- **Error Context**: Detailed information for debugging
-- **Graceful Degradation**: Partial generation when possible
-- **User-Friendly Messages**: Clear error reporting
-
-#### 4. Performance Optimizations
-
-- **Parallel Processing**: Default concurrent file processing
-- **Incremental Builds**: File hash-based caching
-- **Progress Reporting**: User feedback for long operations
-- **Lazy Loading**: Optional deferred validator initialization
-
-#### 5. Output Optimization
-
-- **Tree Shaking**: Individual exports for better bundling
-- **Minification**: Optional compressed output
-- **Lazy Validators**: Reduced initial bundle size
-
 ## Testing
 
 ### Test Structure
@@ -313,7 +244,7 @@ When adding new features:
 // Use services instead of direct implementation
 class MyNewService {
     constructor(private options: MyServiceOptions) {}
-    
+
     async processData(): Promise<Result> {
         try {
             // Implementation
@@ -326,7 +257,7 @@ class MyNewService {
 // Integrate with SchemaGenerator
 this.myService = new MyNewService({
     option1: options.option1,
-    option2: options.option2
+    option2: options.option2,
 });
 ```
 
@@ -356,7 +287,7 @@ const sourceFile = project.createSourceFile(filePath, {}, { overwrite: true });
 // Follow existing patterns for imports and structure
 sourceFile.addImportDeclaration({
     namedImports: ["Type"],
-    moduleSpecifier: getPosixPath("./module")
+    moduleSpecifier: getPosixPath("./module"),
 });
 ```
 
@@ -367,13 +298,7 @@ sourceFile.addImportDeclaration({
 throw new FileDiscoveryError(`No files found matching: ${glob}`, rootPath);
 
 // Provide context with errors
-throw new DuplicateSymbolError(
-    `Symbol '${symbol}' defined differently`,
-    symbol,
-    filePath,
-    existingDef,
-    newDef
-);
+throw new DuplicateSymbolError(`Symbol '${symbol}' defined differently`, symbol, filePath, existingDef, newDef);
 
 // Format errors consistently
 const message = formatError(error, verbose);
