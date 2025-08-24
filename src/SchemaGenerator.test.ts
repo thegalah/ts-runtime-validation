@@ -19,6 +19,13 @@ const getGeneratorConfig = (scenarioPath: string) => {
         helpers: true,
         additionalProperties: false,
         tsconfigPath: "",
+        verbose: false,
+        progress: false,
+        minify: false,
+        cache: false,
+        parallel: false,
+        treeShaking: false,
+        lazyLoad: false
     };
     return options;
 };

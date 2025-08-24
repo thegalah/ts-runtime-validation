@@ -16,10 +16,12 @@ Thank you for your interest in contributing to ts-runtime-validation! This guide
 
 ### Overview
 
-ts-runtime-validation is a TypeScript-first tool that generates JSON Schema validators from TypeScript interfaces and type aliases. The architecture follows a pipeline approach:
+ts-runtime-validation is a TypeScript-first tool that generates JSON Schema validators from TypeScript interfaces and type aliases. The architecture follows a service-oriented pipeline approach:
 
 ```
-TypeScript Files → Parser → Schema Generator → JSON Schema + TypeScript Helpers
+TypeScript Files → FileDiscovery → SchemaProcessor → CodeGenerator → Output Files
+                                                   ↓
+                      SchemaWriter ← Orchestrated by SchemaGenerator
 ```
 
 ### Core Components
@@ -40,31 +42,57 @@ TypeScript Files → Parser → Schema Generator → JSON Schema + TypeScript He
 
 #### 3. Schema Generator (`src/SchemaGenerator.ts`)
 
-- **Purpose**: Core orchestrator of the validation generation pipeline
+- **Purpose**: Core orchestrator that coordinates all services
+- **Architecture**: Uses dependency injection pattern with specialized services
 - **Key Methods**:
-    - `Generate()`: Main entry point that coordinates the entire generation process
-    - `getMatchingFiles()`: Finds TypeScript files matching the glob pattern
-    - `getJsonSchemasForFiles()`: Converts TypeScript to JSON Schema using ts-json-schema-generator
-    - `writeSchemaMapToValidationSchema()`: Writes the consolidated JSON Schema file
-    - `writeSchemaMapToValidationTypes()`: Generates TypeScript type definitions
-    - `writeValidatorFunction()`: Creates the runtime validation helper
-    - `writeValidationTypes()`: Generates the ValidationType namespace
+    - `Generate()`: Main entry point with comprehensive error handling
+    - `clearCache()`: Clears file cache for fresh builds
+    - `cleanOutput()`: Removes previously generated files
+- **Services Used**:
+    - FileDiscovery: File system operations and caching
+    - SchemaProcessor: TypeScript to JSON Schema conversion
+    - CodeGenerator: TypeScript helper file generation
+    - SchemaWriter: File writing operations
+    - ProgressReporter: User feedback and progress tracking
 
 #### 4. Command Options (`src/ICommandOptions.ts`)
 
-- **Purpose**: Type definitions for configuration options
-- **Fields**:
+- **Purpose**: Comprehensive configuration interface for all features
+- **Core Fields**:
     - `glob`: Pattern for finding schema files
     - `rootPath`: Source directory root
     - `output`: Output directory for generated files
     - `helpers`: Whether to generate TypeScript helpers
     - `additionalProperties`: JSON Schema validation strictness
     - `tsconfigPath`: Custom TypeScript configuration
+- **Performance Fields**:
+    - `verbose`: Enable detailed logging
+    - `progress`: Show progress indicators
+    - `parallel`: Enable parallel file processing (default: true)
+    - `cache`: Enable incremental builds with caching
+- **Output Optimization Fields**:
+    - `minify`: Minify generated output
+    - `treeShaking`: Generate tree-shaking friendly exports
+    - `lazyLoad`: Generate lazy-loaded validators
 
-#### 5. Utility Functions
+#### 5. Service Layer (`src/services/`)
 
-- `getPosixPath.ts`: Ensures cross-platform path compatibility
-- `writeLine.ts`: Console output utilities
+- **FileDiscovery.ts**: File system operations, glob matching, caching
+- **SchemaProcessor.ts**: TypeScript AST processing, parallel schema generation
+- **CodeGenerator.ts**: TypeScript file generation with optimization options
+- **SchemaWriter.ts**: File writing operations with output management
+
+#### 6. Error Handling (`src/errors/`)
+
+- **Custom Error Classes**: Specific error types for different failure scenarios
+- **Error Formatting**: User-friendly error messages with context
+- **Error Recovery**: Partial generation on non-critical errors
+
+#### 7. Utility Functions
+
+- `getPosixPath.ts`: Cross-platform path compatibility
+- `writeLine.ts`: Console output utilities (legacy)
+- `utils/ProgressReporter.ts`: Progress tracking and user feedback
 
 ### Dependencies
 
@@ -148,39 +176,65 @@ ts-runtime-validation/
 ├── src/
 │   ├── index.ts                 # CLI entry point
 │   ├── lib.ts                   # Library exports
-│   ├── SchemaGenerator.ts       # Core generator logic
+│   ├── SchemaGenerator.ts       # Orchestrator class
 │   ├── SchemaGenerator.test.ts  # Generator tests
-│   ├── ICommandOptions.ts       # Configuration types
-│   ├── getPosixPath.ts          # Path utilities
-│   ├── writeLine.ts             # Console utilities
+│   ├── ICommandOptions.ts       # Configuration interface
+│   ├── services/                # Core service layer
+│   │   ├── FileDiscovery.ts     # File operations & caching
+│   │   ├── SchemaProcessor.ts   # TypeScript → JSON Schema
+│   │   ├── CodeGenerator.ts     # TypeScript file generation
+│   │   └── SchemaWriter.ts      # File writing operations
+│   ├── errors/                  # Error handling
+│   │   └── index.ts             # Custom error classes
+│   ├── utils/                   # Utilities
+│   │   └── ProgressReporter.ts  # Progress tracking
+│   ├── getPosixPath.ts          # Path utilities (legacy)
+│   ├── writeLine.ts             # Console utilities (legacy)
 │   └── test/                    # Test scenarios
 │       ├── basic-scenario/
 │       └── duplicate-symbols-*/
 ├── dist/                        # Compiled JavaScript
+├── .ts-runtime-validation-cache/ # Cache directory (when enabled)
 ├── package.json
 ├── tsconfig.json               # TypeScript configuration
 ├── jest.config.js              # Test configuration
+├── CONTRIBUTING.md             # This file
 └── README.md
 ```
 
 ### Key Design Patterns
 
-#### 1. Builder Pattern
+#### 1. Service-Oriented Architecture
 
-The SchemaGenerator class uses a builder-like pattern where configuration is set via constructor and generation happens via the `Generate()` method.
+The SchemaGenerator orchestrates specialized services, each with a single responsibility:
+- **FileDiscovery**: File system operations
+- **SchemaProcessor**: TypeScript analysis
+- **CodeGenerator**: File generation
+- **SchemaWriter**: Output management
 
-#### 2. Pipeline Processing
+#### 2. Dependency Injection
 
-Files are processed in stages:
+Services are instantiated in the SchemaGenerator constructor with configuration-based options, making the system testable and modular.
 
-1. File discovery
-2. Schema extraction
-3. Deduplication
-4. File generation
+#### 3. Error Handling Strategy
 
-#### 3. AST Manipulation
+- **Custom Error Classes**: Specific errors for different failure types
+- **Error Context**: Detailed information for debugging
+- **Graceful Degradation**: Partial generation when possible
+- **User-Friendly Messages**: Clear error reporting
 
-Uses ts-morph for generating TypeScript files programmatically, ensuring correct syntax and formatting.
+#### 4. Performance Optimizations
+
+- **Parallel Processing**: Default concurrent file processing
+- **Incremental Builds**: File hash-based caching
+- **Progress Reporting**: User feedback for long operations
+- **Lazy Loading**: Optional deferred validator initialization
+
+#### 5. Output Optimization
+
+- **Tree Shaking**: Individual exports for better bundling
+- **Minification**: Optional compressed output
+- **Lazy Validators**: Reduced initial bundle size
 
 ## Testing
 
@@ -231,64 +285,110 @@ When adding new features:
 
 1. Update `ICommandOptions.ts` with the new field
 2. Add the option in `index.ts` using Commander
-3. Handle the option in `SchemaGenerator.ts`
-4. Update README.md with usage information
+3. Handle the option in the relevant service (FileDiscovery, SchemaProcessor, CodeGenerator, etc.)
+4. Update the SchemaGenerator constructor to pass the option to the service
+5. Update README.md with usage information and examples
 
 #### Modifying generated output:
 
-1. Locate the relevant `write*` method in SchemaGenerator
-2. Use ts-morph for TypeScript generation
-3. Ensure backward compatibility
+1. Identify which service handles the output (CodeGenerator or SchemaWriter)
+2. Modify the appropriate service method
+3. Update the service interface if new options are needed
+4. Test with different configuration options (minify, treeShaking, lazyLoad)
+5. Ensure backward compatibility
 
 #### Supporting new TypeScript features:
 
 1. Check ts-json-schema-generator compatibility
-2. Add test cases for the new feature
-3. Handle edge cases in deduplication logic
+2. Update SchemaProcessor if custom handling is needed
+3. Add test cases for the new feature in multiple scenarios
+4. Handle edge cases in schema validation and deduplication
+5. Update error handling for new failure modes
 
 ### Code Patterns to Follow
+
+#### Service Integration
+
+```typescript
+// Use services instead of direct implementation
+class MyNewService {
+    constructor(private options: MyServiceOptions) {}
+    
+    async processData(): Promise<Result> {
+        try {
+            // Implementation
+        } catch (error) {
+            throw new CustomError(`Processing failed: ${error.message}`);
+        }
+    }
+}
+
+// Integrate with SchemaGenerator
+this.myService = new MyNewService({
+    option1: options.option1,
+    option2: options.option2
+});
+```
 
 #### File System Operations
 
 ```typescript
-// Always use path.join or path.resolve for paths
-const outputPath = path.join(this.options.rootPath, this.options.output);
+// Use FileDiscovery service for file operations
+const files = await this.fileDiscovery.discoverFiles();
 
-// Check existence before operations
-if (!fs.existsSync(this.outputPath)) {
-    fs.mkdirSync(this.outputPath, { recursive: true });
-}
+// Use SchemaWriter for output operations
+await this.schemaWriter.writeJsonSchema(schema, outputFile);
+
+// Always use path utilities
+const posixPath = getPosixPath(rawPath);
 ```
 
 #### AST Manipulation
 
 ```typescript
-// Use ts-morph for generating TypeScript
-const sourceFile = project.createSourceFile(
-    filePath,
-    {},
-    {
-        overwrite: true,
-    }
-);
+// Use CodeGenerator service for TypeScript generation
+await this.codeGenerator.generateSchemaDefinition(schemaMap, outputFile);
 
+// For custom AST manipulation
+const project = new Project(defaultTsMorphProjectSettings);
+const sourceFile = project.createSourceFile(filePath, {}, { overwrite: true });
+
+// Follow existing patterns for imports and structure
 sourceFile.addImportDeclaration({
     namedImports: ["Type"],
-    moduleSpecifier: "./module",
+    moduleSpecifier: getPosixPath("./module")
 });
 ```
 
 #### Error Handling
 
 ```typescript
-// Provide clear error messages
-if (fileList.length === 0) {
-    writeLine(`Aborting - no files found with glob: ${glob}`);
-    return;
-}
+// Use custom error classes
+throw new FileDiscoveryError(`No files found matching: ${glob}`, rootPath);
 
-// Use assertions for validation
-assert.deepEqual(definitions[key], defs[key]);
+// Provide context with errors
+throw new DuplicateSymbolError(
+    `Symbol '${symbol}' defined differently`,
+    symbol,
+    filePath,
+    existingDef,
+    newDef
+);
+
+// Format errors consistently
+const message = formatError(error, verbose);
+console.error(message);
+
+// Handle errors gracefully
+try {
+    await this.processFiles(files);
+} catch (error) {
+    if (isKnownError(error)) {
+        // Handle known errors
+    } else {
+        // Handle unexpected errors
+    }
+}
 ```
 
 ## Pull Request Process
@@ -368,16 +468,30 @@ ts-runtime-validation --glob "*.types.ts" --rootPath ./src
 ### Common Issues
 
 1. **Path resolution issues**: Check Windows vs POSIX paths (use `getPosixPath`)
-2. **Duplicate symbols**: Ensure unique type names across schema files
+2. **Duplicate symbols**: Check error details in verbose mode for conflicting definitions
 3. **Missing dependencies**: Verify peer dependencies are installed
+4. **Performance issues**: Enable caching and check parallel processing settings
+5. **Memory issues**: Use lazy loading for large projects
+6. **Cache corruption**: Clear cache with `generator.clearCache()` if builds seem stale
 
 ### Debug Output
 
-Add debug logging using the `writeLine` utility:
+Use the verbose flag and progress reporting:
 
 ```typescript
-import { writeLine } from "./writeLine";
-writeLine(`Processing file: ${file}`);
+// Enable verbose logging in options
+const options = { ...otherOptions, verbose: true, progress: true };
+
+// Use progress reporter for user feedback
+this.progressReporter.start("Starting operation...");
+this.progressReporter.update(1, "Processing files...");
+this.progressReporter.complete("Operation completed");
+
+// Log detailed information in verbose mode
+if (this.options.verbose) {
+    console.log(`Processing file: ${file.path}`);
+    console.log(`Cache hit: ${!this.fileDiscovery.hasFileChanged(file.path, file.hash)}`);
+}
 ```
 
 ## Getting Help

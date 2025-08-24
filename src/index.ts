@@ -20,6 +20,13 @@ program.option("--output <outputFolder>", `Code generation output directory (rel
 program.option("--tsconfigPath <tsconfigPath>", `Path to customt tsconfig (relative to root path)`, defaultTsconfig);
 program.option("--generate-helpers", "Only generate JSON schema without typescript helper files", true);
 program.option("--additionalProperties", "Allow additional properties to pass validation", false);
+program.option("--verbose", "Enable verbose logging", false);
+program.option("--progress", "Show progress information", false);
+program.option("--minify", "Minify generated output", false);
+program.option("--cache", "Enable file caching for incremental builds", false);
+program.option("--no-parallel", "Disable parallel processing", false);
+program.option("--tree-shaking", "Generate tree-shaking friendly exports", false);
+program.option("--lazy-load", "Generate lazy-loaded validators", false);
 
 program.parse();
 

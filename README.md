@@ -161,6 +161,17 @@ Options:
                                 (default: true)
   --additionalProperties         Allow additional properties in validation
                                 (default: false)
+
+Performance Options:
+  --verbose                      Enable verbose logging
+  --progress                     Show progress information
+  --cache                        Enable file caching for incremental builds
+  --no-parallel                  Disable parallel processing
+
+Output Options:
+  --minify                       Minify generated output
+  --tree-shaking                 Generate tree-shaking friendly exports
+  --lazy-load                    Generate lazy-loaded validators
   -h, --help                     Display help
 ```
 
@@ -180,9 +191,42 @@ The tool generates four files in your output directory:
 ```typescript
 import { SchemaGenerator } from "ts-runtime-validation";
 
-const generator = new SchemaGenerator({ glob: "**/*.types.ts", rootPath: "./src", output: "./validation", additionalProperties: false });
+// Basic usage
+const generator = new SchemaGenerator({
+    glob: "**/*.types.ts",
+    rootPath: "./src",
+    output: "./validation",
+    additionalProperties: false,
+    helpers: true,
+    tsconfigPath: ""
+});
 
-generator.Generate();
+await generator.Generate();
+
+// Advanced usage with performance options
+const optimizedGenerator = new SchemaGenerator({
+    glob: "**/*.jsonschema.ts",
+    rootPath: "./src",
+    output: "./dist/validation",
+    additionalProperties: false,
+    helpers: true,
+    tsconfigPath: "",
+    // Performance options
+    verbose: true,
+    progress: true,
+    cache: true,
+    parallel: true,
+    // Output optimization
+    minify: true,
+    treeShaking: true,
+    lazyLoad: false
+});
+
+await optimizedGenerator.Generate();
+
+// Utility methods
+optimizedGenerator.clearCache(); // Clear file cache
+await optimizedGenerator.cleanOutput(); // Remove generated files
 ```
 
 ### Watch Mode with nodemon
@@ -207,6 +251,18 @@ ts-runtime-validation --glob "**/*.{types,schemas}.ts"
 
 # Specific directories
 ts-runtime-validation --rootPath "./src/api" --output "./src/api/validation"
+
+# Performance optimized build
+ts-runtime-validation --cache --progress --parallel
+
+# Production build with optimizations
+ts-runtime-validation --minify --tree-shaking --cache
+
+# Development with detailed feedback
+ts-runtime-validation --verbose --progress
+
+# Lazy loading for large projects
+ts-runtime-validation --lazy-load --tree-shaking
 ```
 
 ## ⚠️ Limitations
