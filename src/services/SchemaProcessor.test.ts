@@ -340,6 +340,78 @@ describe("SchemaProcessor", () => {
             expect(mergedSchema.$schema).toBe("http://json-schema.org/draft-07/schema#");
             expect(mergedSchema.definitions).toEqual({});
         });
+
+        it("should sort definitions alphabetically in merged schema", async () => {
+            const file1 = await createTestFile("types1.jsonschema.ts", `
+                export interface ZebraType {
+                    id: string;
+                }
+                export interface AppleType {
+                    name: string;
+                }
+            `);
+
+            const file2 = await createTestFile("types2.jsonschema.ts", `
+                export interface MiddleType {
+                    value: number;
+                }
+                export interface BananaType {
+                    flag: boolean;
+                }
+            `);
+
+            const processor = new SchemaProcessor({
+                additionalProperties: false,
+                parallel: false
+            });
+
+            const files: FileInfo[] = [
+                { path: file1 },
+                { path: file2 }
+            ];
+
+            const schemaMap = await processor.processFiles(files);
+            const mergedSchema = processor.mergeSchemas(schemaMap);
+
+            const definitionKeys = Object.keys(mergedSchema.definitions || {});
+            const sortedKeys = [...definitionKeys].sort();
+
+            expect(definitionKeys).toEqual(sortedKeys);
+            expect(definitionKeys).toEqual(['AppleType', 'BananaType', 'MiddleType', 'ZebraType']);
+        });
+
+        it("should maintain alphabetical order for definitions with numbers and special characters", async () => {
+            const file1 = await createTestFile("special.jsonschema.ts", `
+                export interface Type1 {
+                    id: string;
+                }
+                export interface TypeA {
+                    name: string;
+                }
+                export interface Type10 {
+                    value: number;
+                }
+                export interface Type2 {
+                    flag: boolean;
+                }
+            `);
+
+            const processor = new SchemaProcessor({
+                additionalProperties: false,
+                parallel: false
+            });
+
+            const files: FileInfo[] = [{ path: file1 }];
+            const schemaMap = await processor.processFiles(files);
+            const mergedSchema = processor.mergeSchemas(schemaMap);
+
+            const definitionKeys = Object.keys(mergedSchema.definitions || {});
+            const sortedKeys = [...definitionKeys].sort();
+
+            expect(definitionKeys).toEqual(sortedKeys);
+            // Natural alphabetical order: numbers before letters
+            expect(definitionKeys).toEqual(['Type1', 'Type10', 'Type2', 'TypeA']);
+        });
     });
 
     describe("error handling", () => {

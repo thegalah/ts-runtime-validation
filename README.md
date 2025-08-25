@@ -7,6 +7,7 @@ Generate bulletproof runtime type validation from your TypeScript interfaces and
 ## ✨ Features
 
 ### Core Features
+
 - 🚀 **Zero-effort validation** - Automatically generates JSON Schema validators from TypeScript interfaces
 - 🔒 **Type-safe** - Full TypeScript support with type inference and type guards
 - 📦 **Lightweight** - Minimal dependencies, can be installed as a dev dependency
@@ -15,6 +16,7 @@ Generate bulletproof runtime type validation from your TypeScript interfaces and
 - 📝 **JSDoc annotations** - Add validation rules (min/max length, patterns, formats) directly in your TypeScript code
 
 ### Performance & Optimization
+
 - ⚡ **Incremental builds** - File-based caching for faster subsequent builds
 - 🔄 **Parallel processing** - Concurrent file processing for improved performance
 - 📊 **Progress reporting** - Visual feedback for long-running operations
@@ -182,7 +184,7 @@ Output Optimization:
   --minify                       Minify generated JSON schemas
   --tree-shaking                 Generate tree-shaking friendly exports
   --lazy-load                    Generate lazy-loaded validators
-  
+
 General:
   -h, --help                     Display help information
 ```
@@ -191,12 +193,12 @@ General:
 
 The tool generates optimized files in your output directory:
 
-| File                     | Description                                           | Optimizations                    |
-| ------------------------ | ----------------------------------------------------- | -------------------------------- |
-| `validation.schema.json` | JSON Schema definitions for all your types           | Minification with `--minify`     |
-| `SchemaDefinition.ts`    | TypeScript interface mapping schema paths to types   | Tree-shaking ready imports       |
-| `isValidSchema.ts`       | Type guard helper with runtime validation            | Lazy loading with `--lazy-load`  |
-| `ValidationType.ts`      | Centralized type exports                             | Individual exports or namespace   |
+| File                     | Description                                        | Optimizations                   |
+| ------------------------ | -------------------------------------------------- | ------------------------------- |
+| `validation.schema.json` | JSON Schema definitions for all your types         | Minification with `--minify`    |
+| `SchemaDefinition.ts`    | TypeScript interface mapping schema paths to types | Tree-shaking ready imports      |
+| `isValidSchema.ts`       | Type guard helper with runtime validation          | Lazy loading with `--lazy-load` |
+| `ValidationType.ts`      | Centralized type exports                           | Individual exports or namespace |
 
 ### Programmatic API
 
@@ -210,7 +212,7 @@ const generator = new SchemaGenerator({
     output: "./validation",
     helpers: true,
     additionalProperties: false,
-    tsconfigPath: ""
+    tsconfigPath: "",
 });
 
 await generator.Generate();
@@ -224,10 +226,10 @@ const devGenerator = new SchemaGenerator({
     additionalProperties: false,
     tsconfigPath: "",
     // Development optimizations
-    cache: true,          // Enable incremental builds
-    progress: true,       // Show progress feedback
-    verbose: true,        // Detailed logging
-    parallel: true        // Faster processing
+    cache: true, // Enable incremental builds
+    progress: true, // Show progress feedback
+    verbose: true, // Detailed logging
+    parallel: true, // Faster processing
 });
 
 // Production configuration (optimized output)
@@ -239,11 +241,11 @@ const prodGenerator = new SchemaGenerator({
     additionalProperties: false,
     tsconfigPath: "./tsconfig.json",
     // Production optimizations
-    cache: true,          // Faster builds
-    minify: true,         // Smaller output files
-    treeShaking: true,    // Bundle optimization
-    lazyLoad: false,      // Eager loading for performance
-    parallel: true        // Maximum speed
+    cache: true, // Faster builds
+    minify: true, // Smaller output files
+    treeShaking: true, // Bundle optimization
+    lazyLoad: false, // Eager loading for performance
+    parallel: true, // Maximum speed
 });
 
 // Large project configuration (memory efficient)
@@ -254,25 +256,25 @@ const largeProjectGenerator = new SchemaGenerator({
     helpers: true,
     additionalProperties: false,
     tsconfigPath: "",
-    // Large project optimizations  
-    cache: true,          // Essential for large projects
-    progress: true,       // Track long operations
-    lazyLoad: true,       // Reduce initial memory usage
-    treeShaking: true,    // Optimize bundle size
-    minify: true          // Reduce file size
+    // Large project optimizations
+    cache: true, // Essential for large projects
+    progress: true, // Track long operations
+    lazyLoad: true, // Reduce initial memory usage
+    treeShaking: true, // Optimize bundle size
+    minify: true, // Reduce file size
 });
 
 // Execute generation
 try {
     await generator.Generate();
-    console.log('Schema generation completed successfully!');
+    console.log("Schema generation completed successfully!");
 } catch (error) {
-    console.error('Generation failed:', error.message);
+    console.error("Generation failed:", error.message);
 }
 
 // Utility methods
-generator.clearCache();           // Clear file cache
-await generator.cleanOutput();    // Remove generated files
+generator.clearCache(); // Clear file cache
+await generator.cleanOutput(); // Remove generated files
 ```
 
 ### Watch Mode & Development Workflows
@@ -330,6 +332,7 @@ ts-runtime-validation --cache
 ```
 
 **How it works:**
+
 - Generates MD5 hashes of source files to detect changes
 - Stores cache in `.ts-runtime-validation-cache/`
 - Only processes files that have been modified
@@ -338,18 +341,21 @@ ts-runtime-validation --cache
 ### Performance Tips
 
 **Development Workflow:**
+
 ```bash
 # Fast iterations with caching and progress
 ts-runtime-validation --cache --progress --verbose
 ```
 
 **Production Builds:**
+
 ```bash
 # Optimized output for deployment
 ts-runtime-validation --cache --minify --tree-shaking
 ```
 
 **Large Projects:**
+
 ```bash
 # Memory efficient processing
 ts-runtime-validation --cache --lazy-load --progress
@@ -358,18 +364,21 @@ ts-runtime-validation --cache --lazy-load --progress
 ### Bundle Optimization
 
 **Tree-shaking friendly exports:**
+
 ```typescript
 // With --tree-shaking flag
-export type IUser = _IUser;      // Individual exports
+export type IUser = _IUser; // Individual exports
 export type IProduct = _IProduct;
 
 // Default behavior
-namespace ValidationType {       // Namespace exports
+namespace ValidationType {
+    // Namespace exports
     export type IUser = _IUser;
 }
 ```
 
 **Lazy-loaded validators:**
+
 ```typescript
 // With --lazy-load flag
 let validator: any = null;
@@ -426,6 +435,7 @@ ts-runtime-validation uses a modern service-oriented architecture:
 ### Contributing Guidelines
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed information about:
+
 - Service-oriented architecture patterns
 - Error handling strategies
 - Performance optimization techniques
