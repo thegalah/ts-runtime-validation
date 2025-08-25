@@ -27,9 +27,12 @@ export class SchemaProcessor {
             console.log(`Processing ${files.length} files...`);
         }
 
+        // Sort files by path to ensure consistent processing order
+        const sortedFiles = [...files].sort((a, b) => a.path.localeCompare(b.path));
+
         const results = parallel
-            ? await this.processInParallel(files)
-            : await this.processSequentially(files);
+            ? await this.processInParallel(sortedFiles)
+            : await this.processSequentially(sortedFiles);
 
         return this.consolidateSchemas(results);
     }
@@ -38,6 +41,7 @@ export class SchemaProcessor {
         const promises = files.map(file => this.processFile(file));
         const results = await Promise.allSettled(promises);
         
+        // Map results back to original file order to maintain consistency
         return results.map((result, index) => {
             if (result.status === 'fulfilled') {
                 return result.value;
@@ -106,7 +110,10 @@ export class SchemaProcessor {
         const schemaMap = new Map<string, Schema>();
         const errors: Error[] = [];
         
-        for (const result of results) {
+        // Sort results by file path to ensure consistent order
+        const sortedResults = [...results].sort((a, b) => a.file.localeCompare(b.file));
+        
+        for (const result of sortedResults) {
             if (result.error) {
                 errors.push(result.error);
                 continue;
@@ -128,10 +135,14 @@ export class SchemaProcessor {
     public validateSchemaCompatibility(schemaMap: Map<string, Schema>): void {
         const definitions: { [id: string]: any } = {};
         
-        schemaMap.forEach((fileSchema, filePath) => {
+        // Sort by file path for consistent processing order
+        const sortedEntries = [...schemaMap.entries()].sort(([a], [b]) => a.localeCompare(b));
+        
+        for (const [filePath, fileSchema] of sortedEntries) {
             const defs = fileSchema.definitions ?? {};
             
-            Object.keys(defs).forEach((key) => {
+            // Sort definition keys for consistent processing
+            Object.keys(defs).sort().forEach((key) => {
                 if (definitions[key] !== undefined) {
                     try {
                         assert.deepEqual(definitions[key], defs[key]);
@@ -147,23 +158,27 @@ export class SchemaProcessor {
                 }
                 definitions[key] = defs[key];
             });
-        });
+        }
     }
 
     public mergeSchemas(schemaMap: Map<string, Schema>): Schema {
         const definitions: { [id: string]: Schema } = {};
         let schemaVersion = "";
         
-        schemaMap.forEach((fileSchema) => {
+        // Sort by file path for consistent processing order
+        const sortedEntries = [...schemaMap.entries()].sort(([a], [b]) => a.localeCompare(b));
+        
+        for (const [, fileSchema] of sortedEntries) {
             if (!schemaVersion && fileSchema["$schema"]) {
                 schemaVersion = fileSchema["$schema"];
             }
             
             const defs = fileSchema.definitions ?? {};
-            Object.keys(defs).forEach((key) => {
+            // Sort definition keys for consistent processing
+            Object.keys(defs).sort().forEach((key) => {
                 definitions[key] = defs[key] as Schema;
             });
-        });
+        }
         
         // Sort definitions alphabetically
         const sortedDefinitions: { [id: string]: Schema } = {};
