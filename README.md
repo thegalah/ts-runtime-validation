@@ -2,7 +2,9 @@
 
 [![npm version](https://badge.fury.io/js/ts-runtime-validation.svg)](https://www.npmjs.com/package/ts-runtime-validation)
 
-Generate bulletproof runtime type validation from your TypeScript interfaces and type aliases. No manual schema writing, no decorators, just your existing TypeScript types.
+Automatically generate type-safe runtime validation from your existing TypeScript interfaces. Zero configuration, zero decorators - just add JSDoc comments for validation rules and get bulletproof runtime type checking with full TypeScript support.
+
+📖 **[Project Marketing Page](https://www.thegalah.com/projects/ts-runtime-validation)**
 
 ## ✨ Features
 
