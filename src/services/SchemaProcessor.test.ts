@@ -4,7 +4,7 @@ import { SchemaProcessor } from "./SchemaProcessor";
 import { FileInfo } from "./FileDiscovery";
 import { DuplicateSymbolError } from "../errors";
 
-const testDir = path.resolve(__dirname, "../test-tmp/schema-processor");
+const testDir = path.resolve(__dirname, "../../.test-tmp/schema-processor");
 
 const createTestFile = async (filePath: string, content: string) => {
     const fullPath = path.resolve(testDir, filePath);

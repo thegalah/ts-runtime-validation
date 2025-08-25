@@ -5,8 +5,8 @@ import * as path from "path";
 import * as crypto from "crypto";
 
 describe("SchemaGenerator - Deterministic Output", () => {
-    const testOutputPath1 = path.join(__dirname, ".test-output-1");
-    const testOutputPath2 = path.join(__dirname, ".test-output-2");
+    const testOutputPath1 = path.join(__dirname, "../.test-tmp/deterministic-output-1");
+    const testOutputPath2 = path.join(__dirname, "../.test-tmp/deterministic-output-2");
 
     beforeEach(() => {
         // Clean up test directories before each test
@@ -55,7 +55,7 @@ describe("SchemaGenerator - Deterministic Output", () => {
         const options1: ICommandOptions = {
             glob: "test/basic-scenario/*.jsonschema.ts",
             rootPath: path.join(__dirname),
-            output: ".test-output-1",
+            output: "../.test-tmp/deterministic-output-1",
             tsconfigPath: "",
             helpers: true,
             additionalProperties: false,
@@ -70,7 +70,7 @@ describe("SchemaGenerator - Deterministic Output", () => {
 
         const options2: ICommandOptions = {
             ...options1,
-            output: ".test-output-2",
+            output: "../.test-tmp/deterministic-output-2",
         };
 
         // First generation
@@ -97,7 +97,7 @@ describe("SchemaGenerator - Deterministic Output", () => {
         const options1: ICommandOptions = {
             glob: "test/duplicate-symbols-identitcal-implementation/*.jsonschema.ts",
             rootPath: path.join(__dirname),
-            output: ".test-output-1",
+            output: "../.test-tmp/deterministic-output-1",
             tsconfigPath: "",
             helpers: true,
             additionalProperties: false,
@@ -112,7 +112,7 @@ describe("SchemaGenerator - Deterministic Output", () => {
 
         const options2: ICommandOptions = {
             ...options1,
-            output: ".test-output-2",
+            output: "../.test-tmp/deterministic-output-2",
         };
 
         // First generation
@@ -152,13 +152,13 @@ describe("SchemaGenerator - Deterministic Output", () => {
 
         const optionsParallel: ICommandOptions = {
             ...baseOptions,
-            output: ".test-output-1",
+            output: "../.test-tmp/deterministic-output-1",
             parallel: true,
         };
 
         const optionsSequential: ICommandOptions = {
             ...baseOptions,
-            output: ".test-output-2",
+            output: "../.test-tmp/deterministic-output-2",
             parallel: false,
         };
 
@@ -199,14 +199,14 @@ describe("SchemaGenerator - Deterministic Output", () => {
 
         const optionsTreeShaking1: ICommandOptions = {
             ...baseOptions,
-            output: ".test-output-1",
+            output: "../.test-tmp/deterministic-output-1",
             treeShaking: true,
             lazyLoad: false,
         };
 
         const optionsTreeShaking2: ICommandOptions = {
             ...baseOptions,
-            output: ".test-output-2",
+            output: "../.test-tmp/deterministic-output-2",
             treeShaking: true,
             lazyLoad: false,
         };
@@ -235,7 +235,7 @@ describe("SchemaGenerator - Deterministic Output", () => {
         const options: ICommandOptions = {
             glob: "test/duplicate-symbols-identitcal-implementation/*.jsonschema.ts",
             rootPath: path.join(__dirname),
-            output: ".test-output-1",
+            output: "../.test-tmp/deterministic-output-1",
             tsconfigPath: "",
             helpers: true,
             additionalProperties: false,

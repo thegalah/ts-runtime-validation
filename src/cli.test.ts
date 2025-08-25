@@ -4,7 +4,7 @@ import * as fs from "fs";
 
 describe("CLI Arguments", () => {
     const cliPath = path.join(__dirname, "..", "dist", "index.js");
-    const testOutputPath = path.join(__dirname, ".test-cli-output");
+    const testOutputPath = path.join(__dirname, "../.test-tmp/cli-output");
     
     beforeEach(() => {
         if (fs.existsSync(testOutputPath)) {
@@ -42,7 +42,7 @@ describe("CLI Arguments", () => {
         const result = await runCLI([
             "--glob", "test/basic-scenario/*.jsonschema.ts",
             "--rootPath", path.join(__dirname),
-            "--output", ".test-cli-output"
+            "--output", "../.test-tmp/cli-output"
         ]);
         
         expect(result.code).toBe(0);
@@ -72,7 +72,7 @@ describe("CLI Arguments", () => {
         try {
             const result = await runCLI([
                 "--rootPath", testDir,
-                "--output", path.join("..", ".test-cli-output")
+                "--output", path.join("..", "../.test-tmp/cli-output")
             ]);
             
             expect(result.code).toBe(0);
@@ -89,7 +89,7 @@ describe("CLI Arguments", () => {
         const result = await runCLI([
             "--glob", "test/basic-scenario/*.jsonschema.ts",
             "--rootPath", path.join(__dirname),
-            "--output", ".test-cli-output",
+            "--output", "../.test-tmp/cli-output",
             "--additionalProperties",
             "--verbose",
             "--progress",
@@ -109,7 +109,7 @@ describe("CLI Arguments", () => {
         const result = await runCLI([
             "--glob", "test/basic-scenario/*.jsonschema.ts",
             "--rootPath", path.join(__dirname),
-            "--output", ".test-cli-output",
+            "--output", "../.test-tmp/cli-output",
             "--no-parallel"
         ]);
         
@@ -121,7 +121,7 @@ describe("CLI Arguments", () => {
         const result = await runCLI([
             "--glob", "nonexistent/*.jsonschema.ts",
             "--rootPath", path.join(__dirname),
-            "--output", ".test-cli-output"
+            "--output", "../.test-tmp/cli-output"
         ]);
         
         expect(result.code).not.toBe(0);
