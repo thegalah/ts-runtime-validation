@@ -3,7 +3,7 @@ import path from "path";
 import { FileDiscovery } from "./FileDiscovery";
 import { FileDiscoveryError } from "../errors";
 
-const testDir = path.resolve(__dirname, "../test-tmp/file-discovery");
+const testDir = path.resolve(__dirname, "../../.test-tmp/file-discovery");
 const cacheDir = path.resolve(testDir, ".cache");
 
 const createTestFile = async (filePath: string, content: string = "test content") => {

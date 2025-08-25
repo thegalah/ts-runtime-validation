@@ -3,7 +3,7 @@ import path from "path";
 import { SchemaWriter } from "./SchemaWriter";
 import { CodeGenerationError } from "../errors";
 
-const testDir = path.resolve(__dirname, "../test-tmp/schema-writer");
+const testDir = path.resolve(__dirname, "../../.test-tmp/schema-writer");
 
 const cleanup = async () => {
     if (fs.existsSync(testDir)) {

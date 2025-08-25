@@ -54,9 +54,12 @@ export class FileDiscovery {
                 );
             }
 
+            // Sort files alphabetically to ensure consistent ordering
+            const sortedFiles = [...files].sort();
+
             return this.options.cacheEnabled 
-                ? await this.enrichWithCacheInfo(files)
-                : files.map(path => ({ path }));
+                ? await this.enrichWithCacheInfo(sortedFiles)
+                : sortedFiles.map(path => ({ path }));
         } catch (error) {
             if (error instanceof FileDiscoveryError) {
                 throw error;

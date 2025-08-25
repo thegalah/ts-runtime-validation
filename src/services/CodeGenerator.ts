@@ -98,7 +98,10 @@ export class CodeGenerator {
         const readerProject = new Project(defaultTsMorphProjectSettings);
         const typeInfos: TypeInfo[] = [];
         
-        schemaMap.forEach((schema, filePath) => {
+        // Sort schema map entries by file path for consistent processing order
+        const sortedEntries = [...schemaMap.entries()].sort(([a], [b]) => a.localeCompare(b));
+        
+        for (const [filePath, schema] of sortedEntries) {
             const dir = path.dirname(filePath);
             const fileWithoutExtension = path.parse(filePath).name;
             const relativeFilePath = path.relative(this.options.outputPath, dir);
@@ -107,7 +110,8 @@ export class CodeGenerator {
             
             const readerSourceFile = readerProject.addSourceFileAtPath(filePath);
             
-            Object.keys(defs).forEach((symbol) => {
+            // Sort definition keys alphabetically
+            Object.keys(defs).sort().forEach((symbol) => {
                 const typeAlias = readerSourceFile.getTypeAlias(symbol);
                 const typeInterface = readerSourceFile.getInterface(symbol);
                 
@@ -119,9 +123,10 @@ export class CodeGenerator {
                     });
                 }
             });
-        });
+        }
         
-        return typeInfos;
+        // Sort typeInfos alphabetically by symbol
+        return typeInfos.sort((a, b) => a.symbol.localeCompare(b.symbol));
     }
 
     private async writeSchemaDefinitionFile(
@@ -145,7 +150,8 @@ export class CodeGenerator {
                     type: "Record<keyof ISchema, string>",
                     initializer: (writer: CodeBlockWriter) => {
                         writer.writeLine(`{`);
-                        typeInfos.forEach(({ symbol }) => {
+                        // Sort by symbol for consistent output
+                        [...typeInfos].sort((a, b) => a.symbol.localeCompare(b.symbol)).forEach(({ symbol }) => {
                             writer.writeLine(`["#/definitions/${symbol}"] : "${symbol}",`);
                         });
                         writer.writeLine(`}`);
@@ -158,7 +164,7 @@ export class CodeGenerator {
             kind: StructureKind.Interface,
             name: "ISchema",
             isExported: true,
-            properties: typeInfos.map(({ symbol }) => ({
+            properties: [...typeInfos].sort((a, b) => a.symbol.localeCompare(b.symbol)).map(({ symbol }) => ({
                 name: `readonly ["#/definitions/${symbol}"]`,
                 type: symbol
             })),
@@ -176,7 +182,10 @@ export class CodeGenerator {
             importMap.set(importPath, existing);
         });
         
-        importMap.forEach((symbols, importPath) => {
+        // Sort import paths and symbols alphabetically
+        const sortedImportPaths = Array.from(importMap.keys()).sort();
+        sortedImportPaths.forEach((importPath) => {
+            const symbols = importMap.get(importPath)!.sort();
             sourceFile.addImportDeclaration({
                 namedImports: symbols,
                 moduleSpecifier: importPath
@@ -193,7 +202,10 @@ export class CodeGenerator {
             importMap.set(importPath, existing);
         });
         
-        importMap.forEach((symbols, importPath) => {
+        // Sort import paths and symbols alphabetically
+        const sortedImportPaths = Array.from(importMap.keys()).sort();
+        sortedImportPaths.forEach((importPath) => {
+            const symbols = importMap.get(importPath)!.sort();
             sourceFile.addImportDeclaration({
                 namedImports: symbols,
                 moduleSpecifier: importPath
@@ -306,13 +318,19 @@ export class CodeGenerator {
         const sourceFile = this.project.createSourceFile(outputFile, {}, defaultCreateFileOptions);
         
         const importMap = new Map<string, string[]>();
-        typeInfos.forEach(({ symbol, importPath }) => {
+        // Sort typeInfos for consistent processing
+        const sortedTypeInfos = [...typeInfos].sort((a, b) => a.symbol.localeCompare(b.symbol));
+        
+        sortedTypeInfos.forEach(({ symbol, importPath }) => {
             const existing = importMap.get(importPath) || [];
             existing.push(symbol);
             importMap.set(importPath, existing);
         });
         
-        importMap.forEach((symbols, importPath) => {
+        // Sort import paths and symbols alphabetically
+        const sortedImportPaths = Array.from(importMap.keys()).sort();
+        sortedImportPaths.forEach((importPath) => {
+            const symbols = importMap.get(importPath)!.sort();
             const declaration = sourceFile.addImportDeclaration({
                 moduleSpecifier: importPath
             });
@@ -325,7 +343,7 @@ export class CodeGenerator {
         });
         
         if (this.options.treeShaking) {
-            typeInfos.forEach(({ symbol }) => {
+            sortedTypeInfos.forEach(({ symbol }) => {
                 sourceFile.addTypeAlias({
                     name: symbol,
                     type: `_${symbol}`,
@@ -338,7 +356,7 @@ export class CodeGenerator {
                 isExported: true,
             });
             
-            typeInfos.forEach(({ symbol }) => {
+            sortedTypeInfos.forEach(({ symbol }) => {
                 namespace.addTypeAlias({
                     name: symbol,
                     type: `_${symbol}`,

@@ -122,4 +122,115 @@ describe("SchemaGenerator", () => {
         };
         expect(result).toStrictEqual(expected);
     });
+
+    test("it should sort definitions alphabetically in the generated schema", async () => {
+        // Create test directory and files
+        const testDir = path.resolve(__dirname, "./test/alphabetical-sorting");
+        
+        // Ensure test directory exists
+        fs.mkdirSync(testDir, { recursive: true });
+        
+        // Create test file with unsorted type definitions
+        const testFilePath = path.join(testDir, "types.jsonschema.ts");
+        fs.writeFileSync(testFilePath, `
+            export interface ZebraType {
+                id: string;
+            }
+            
+            export interface AppleType {
+                name: string;
+            }
+            
+            export interface MiddleType {
+                value: number;
+            }
+            
+            export interface BananaType {
+                flag: boolean;
+            }
+        `);
+        
+        try {
+            const options = getGeneratorConfig("alphabetical-sorting");
+            const generator = new SchemaGenerator(options);
+            await generator.Generate();
+            
+            const rawFile = fs.readFileSync(getOutputSchemaPath("alphabetical-sorting")).toString();
+            const result = JSON.parse(rawFile);
+            
+            // Check that definitions are sorted alphabetically
+            const definitionKeys = Object.keys(result.definitions);
+            const sortedKeys = [...definitionKeys].sort();
+            
+            expect(definitionKeys).toEqual(sortedKeys);
+            expect(definitionKeys).toEqual(['AppleType', 'BananaType', 'MiddleType', 'ZebraType']);
+        } finally {
+            // Clean up test directory
+            if (fs.existsSync(testDir)) {
+                fs.rmSync(testDir, { recursive: true });
+            }
+        }
+    });
+
+    test("it should sort properties alphabetically in generated TypeScript helpers", async () => {
+        // Create test directory and files
+        const testDir = path.resolve(__dirname, "./test/alphabetical-helpers");
+        const outputDir = path.resolve(__dirname, "./test/output/alphabetical-helpers");
+        
+        // Ensure test directory exists
+        fs.mkdirSync(testDir, { recursive: true });
+        
+        // Create test file with unsorted type definitions
+        const testFilePath = path.join(testDir, "types.jsonschema.ts");
+        fs.writeFileSync(testFilePath, `
+            export type ZebraType = string;
+            export type AppleType = number;
+            export type MiddleType = boolean;
+            export type BananaType = object;
+        `);
+        
+        try {
+            const options = {
+                ...getGeneratorConfig("alphabetical-helpers"),
+                helpers: true
+            };
+            const generator = new SchemaGenerator(options);
+            await generator.Generate();
+            
+            // Check SchemaDefinition.ts for sorted imports and properties
+            const schemaDefPath = path.resolve(outputDir, "SchemaDefinition.ts");
+            if (fs.existsSync(schemaDefPath)) {
+                const schemaDefContent = fs.readFileSync(schemaDefPath, 'utf-8');
+                
+                // Extract type names from the schemas object (looking only at the schemas constant)
+                const schemasMatch = schemaDefContent.match(/export const schemas[^{]*{([\s\S]*?)}/);
+                let schemaKeys: string[] = [];
+                if (schemasMatch) {
+                    const schemaLines = schemasMatch[1].split('\n').filter(line => line.includes('#/definitions/'));
+                    schemaKeys = schemaLines.map(line => {
+                        const match = line.match(/\["#\/definitions\/([^"]+)"\]/);
+                        return match ? match[1] : null;
+                    }).filter(Boolean) as string[];
+                }
+                
+                const sortedSchemaKeys = [...schemaKeys].sort();
+                
+                expect(schemaKeys).toEqual(sortedSchemaKeys);
+                expect(schemaKeys).toEqual(['AppleType', 'BananaType', 'MiddleType', 'ZebraType']);
+                
+                // Check that imports are sorted
+                const importMatch = schemaDefContent.match(/import\s+{\s*([^}]+)\s*}/);
+                if (importMatch) {
+                    const imports = importMatch[1].split(',').map(s => s.trim());
+                    const sortedImports = [...imports].sort();
+                    expect(imports).toEqual(sortedImports);
+                }
+            }
+        } finally {
+            // Clean up test directory
+            if (fs.existsSync(testDir)) {
+                fs.rmSync(testDir, { recursive: true });
+            }
+        }
+    });
 });

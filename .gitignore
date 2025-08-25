@@ -1,4 +1,5 @@
 node_modules
 dist
 coverage
-src/test/output
+.test-tmp/
+.ts-runtime-validation-cache

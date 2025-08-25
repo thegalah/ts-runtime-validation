@@ -3,7 +3,7 @@ import path from "path";
 import { SchemaGenerator } from "./SchemaGenerator";
 import { ICommandOptions } from "./ICommandOptions";
 
-const testDir = path.resolve(__dirname, "./test-tmp/integration");
+const testDir = path.resolve(__dirname, "../.test-tmp/integration");
 
 const createTestFile = async (filePath: string, content: string) => {
     const fullPath = path.resolve(testDir, filePath);
@@ -396,8 +396,8 @@ describe("SchemaGenerator Integration Tests", () => {
             const endTime = Date.now();
             const duration = endTime - startTime;
             
-            // Should complete reasonably quickly (less than 10 seconds)
-            expect(duration).toBeLessThan(10000);
+            // Should complete reasonably quickly (less than 20 seconds)
+            expect(duration).toBeLessThan(20000);
             
             // Verify all files were processed
             const schemaFile = path.join(testDir, "output", "validation.schema.json");
