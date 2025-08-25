@@ -2,3 +2,7 @@ node_modules
 dist
 coverage
 src/test/output
+src/.test-output-*
+src/.test-cli-output
+src/.ts-runtime-validation-test*
+.ts-runtime-validation-cache

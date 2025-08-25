@@ -11,7 +11,7 @@ const defaultOutputFolder = "./.ts-runtime-validation";
 const defaultTsconfig = "";
 
 program.option(
-    "--glob",
+    "--glob <glob>",
     `Glob file path of typescript files to generate ts-interface -> json-schema validations - default: ${defaultGlobPattern}`,
     defaultGlobPattern
 );
