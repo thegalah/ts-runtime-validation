@@ -107,7 +107,8 @@ export class CodeGenerator {
             
             const readerSourceFile = readerProject.addSourceFileAtPath(filePath);
             
-            Object.keys(defs).forEach((symbol) => {
+            // Sort definition keys alphabetically
+            Object.keys(defs).sort().forEach((symbol) => {
                 const typeAlias = readerSourceFile.getTypeAlias(symbol);
                 const typeInterface = readerSourceFile.getInterface(symbol);
                 
@@ -121,7 +122,8 @@ export class CodeGenerator {
             });
         });
         
-        return typeInfos;
+        // Sort typeInfos alphabetically by symbol
+        return typeInfos.sort((a, b) => a.symbol.localeCompare(b.symbol));
     }
 
     private async writeSchemaDefinitionFile(
@@ -176,7 +178,10 @@ export class CodeGenerator {
             importMap.set(importPath, existing);
         });
         
-        importMap.forEach((symbols, importPath) => {
+        // Sort import paths and symbols alphabetically
+        const sortedImportPaths = Array.from(importMap.keys()).sort();
+        sortedImportPaths.forEach((importPath) => {
+            const symbols = importMap.get(importPath)!.sort();
             sourceFile.addImportDeclaration({
                 namedImports: symbols,
                 moduleSpecifier: importPath
@@ -193,7 +198,10 @@ export class CodeGenerator {
             importMap.set(importPath, existing);
         });
         
-        importMap.forEach((symbols, importPath) => {
+        // Sort import paths and symbols alphabetically
+        const sortedImportPaths = Array.from(importMap.keys()).sort();
+        sortedImportPaths.forEach((importPath) => {
+            const symbols = importMap.get(importPath)!.sort();
             sourceFile.addImportDeclaration({
                 namedImports: symbols,
                 moduleSpecifier: importPath
@@ -312,7 +320,10 @@ export class CodeGenerator {
             importMap.set(importPath, existing);
         });
         
-        importMap.forEach((symbols, importPath) => {
+        // Sort import paths and symbols alphabetically
+        const sortedImportPaths = Array.from(importMap.keys()).sort();
+        sortedImportPaths.forEach((importPath) => {
+            const symbols = importMap.get(importPath)!.sort();
             const declaration = sourceFile.addImportDeclaration({
                 moduleSpecifier: importPath
             });

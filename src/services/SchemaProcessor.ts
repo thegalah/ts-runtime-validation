@@ -165,9 +165,15 @@ export class SchemaProcessor {
             });
         });
         
+        // Sort definitions alphabetically
+        const sortedDefinitions: { [id: string]: Schema } = {};
+        Object.keys(definitions).sort().forEach(key => {
+            sortedDefinitions[key] = definitions[key];
+        });
+        
         return {
             $schema: schemaVersion || "http://json-schema.org/draft-07/schema#",
-            definitions,
+            definitions: sortedDefinitions,
         };
     }
 }
