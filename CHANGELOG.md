@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1] - 2024-08-25
+
+### Changed
+- **Major dependency updates** to latest versions for security and performance
+- Updated Jest from 29.7.0 to 30.0.5 
+- Updated ts-json-schema-generator from 1.5.1 to 2.4.0
+- Updated ts-morph from 19.0.0 to 26.0.0
+- Updated Commander from 11.1.0 to 14.0.0
+- Updated picomatch from 2.3.1 to 4.0.3
+- Updated all @types packages to latest versions
+
+### Fixed
+- Added missing ajv peer dependency
+- Resolved all dependency version conflicts
+
+### Security
+- Zero vulnerabilities reported by yarn audit
+- All dependencies updated to secure versions
+
 ## [1.8.0] - 2024-08-25
 
 ### Added
@@ -116,7 +135,8 @@ ts-runtime-validation --cache --progress --minify --tree-shaking
 
 ---
 
-[Unreleased]: https://github.com/thegalah/ts-runtime-validation/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/thegalah/ts-runtime-validation/compare/v1.8.1...HEAD
+[1.8.1]: https://github.com/thegalah/ts-runtime-validation/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/thegalah/ts-runtime-validation/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/thegalah/ts-runtime-validation/compare/v1.6.16...v1.7.0
 [1.6.16]: https://github.com/thegalah/ts-runtime-validation/compare/v1.6.15...v1.6.16
