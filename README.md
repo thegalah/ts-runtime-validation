@@ -340,6 +340,24 @@ ts-runtime-validation --cache
 - Only processes files that have been modified
 - Provides significant speedup for large projects
 
+**Clearing the cache:**
+
+If you encounter issues with stale generated files or need to force a full regeneration:
+
+```bash
+# Method 1: Delete cache directory
+rm -rf .ts-runtime-validation-cache
+
+# Method 2: Using programmatic API
+const generator = new SchemaGenerator(options);
+generator.clearCache();
+
+# Method 3: Add a clean script to package.json
+"scripts": {
+  "generate-types:clean": "rm -rf .ts-runtime-validation-cache && ts-runtime-validation --cache"
+}
+```
+
 ### Performance Tips
 
 **Development Workflow:**
@@ -500,3 +518,36 @@ Choose **alternatives** when you:
 - Prefer schema-first design (define validation, derive types)
 - Need complex runtime transformations or coercions
 - Want extensive built-in validation methods and error messages
+
+## 🔧 Troubleshooting
+
+### Generated files are not updating
+
+If your generated files seem stale or aren't reflecting recent changes:
+
+```bash
+# Clear the cache and regenerate
+rm -rf .ts-runtime-validation-cache
+ts-runtime-validation --cache
+```
+
+### Hash inconsistencies between runs
+
+Version 1.8.0+ includes fixes for deterministic output generation. If you're experiencing different file hashes between runs, ensure you're using the latest version.
+
+### Performance issues with large projects
+
+For optimal performance with large codebases:
+
+```bash
+# Enable all performance optimizations
+ts-runtime-validation --cache --parallel --minify --tree-shaking
+```
+
+### Cache-related issues
+
+The cache directory `.ts-runtime-validation-cache/` can occasionally become corrupted. If you experience unexpected behavior:
+
+1. Clear the cache directory: `rm -rf .ts-runtime-validation-cache`
+2. Run generation again with cache enabled: `ts-runtime-validation --cache`
+3. Add `.ts-runtime-validation-cache/` to your `.gitignore` file
