@@ -414,6 +414,240 @@ describe("SchemaProcessor", () => {
         });
     });
 
+    describe("single-pass processing", () => {
+        it("should use single-pass when glob and rootPath are provided with multiple files", async () => {
+            const file1 = await createTestFile("user.jsonschema.ts", `
+                export interface IUser {
+                    id: string;
+                    name: string;
+                }
+            `);
+
+            const file2 = await createTestFile("product.jsonschema.ts", `
+                export interface IProduct {
+                    id: string;
+                    title: string;
+                    price: number;
+                }
+            `);
+
+            const processor = new SchemaProcessor({
+                additionalProperties: false,
+                parallel: false,
+                verbose: false,
+                glob: "*.jsonschema.ts",
+                rootPath: testDir
+            });
+
+            const files: FileInfo[] = [
+                { path: file1 },
+                { path: file2 }
+            ];
+
+            const schemaMap = await processor.processFiles(files);
+
+            expect(schemaMap.size).toBe(2);
+            expect(schemaMap.has(file1)).toBe(true);
+            expect(schemaMap.has(file2)).toBe(true);
+
+            // Both files should have all definitions (single-pass partitioning)
+            const schema1 = schemaMap.get(file1)!;
+            const schema2 = schemaMap.get(file2)!;
+            expect(schema1.definitions!.IUser).toBeDefined();
+            expect(schema1.definitions!.IProduct).toBeDefined();
+            expect(schema2.definitions!.IUser).toBeDefined();
+            expect(schema2.definitions!.IProduct).toBeDefined();
+        });
+
+        it("should fall back to per-file processing when duplicate type names exist", async () => {
+            const file1 = await createTestFile("a/types.jsonschema.ts", `
+                export interface IDuplicate {
+                    id: string;
+                    name: string;
+                }
+            `);
+
+            const file2 = await createTestFile("b/types.jsonschema.ts", `
+                export interface IDuplicate {
+                    id: string;
+                    email: string;
+                }
+            `);
+
+            const processor = new SchemaProcessor({
+                additionalProperties: false,
+                parallel: false,
+                verbose: false,
+                glob: "*.jsonschema.ts",
+                rootPath: testDir
+            });
+
+            const files: FileInfo[] = [
+                { path: file1 },
+                { path: file2 }
+            ];
+
+            const schemaMap = await processor.processFiles(files);
+
+            // Falls back to per-file: each file only has its own definitions
+            const schema1 = schemaMap.get(file1)!;
+            const schema2 = schemaMap.get(file2)!;
+            expect(schema1.definitions!.IDuplicate).toBeDefined();
+            expect(schema2.definitions!.IDuplicate).toBeDefined();
+
+            // The schemas should differ (different implementations)
+            expect((schema1.definitions!.IDuplicate as any).properties.name).toBeDefined();
+            expect((schema2.definitions!.IDuplicate as any).properties.email).toBeDefined();
+        });
+
+        it("should not use single-pass for a single file", async () => {
+            const file1 = await createTestFile("user.jsonschema.ts", `
+                export interface IUser {
+                    id: string;
+                    name: string;
+                }
+            `);
+
+            const processor = new SchemaProcessor({
+                additionalProperties: false,
+                parallel: false,
+                verbose: false,
+                glob: "*.jsonschema.ts",
+                rootPath: testDir
+            });
+
+            const files: FileInfo[] = [{ path: file1 }];
+            const schemaMap = await processor.processFiles(files);
+
+            expect(schemaMap.size).toBe(1);
+            const schema = schemaMap.get(file1)!;
+            expect(schema.definitions!.IUser).toBeDefined();
+        });
+
+        it("should not use single-pass when glob is not provided", async () => {
+            const file1 = await createTestFile("user.jsonschema.ts", `
+                export interface IUser {
+                    id: string;
+                    name: string;
+                }
+            `);
+
+            const file2 = await createTestFile("product.jsonschema.ts", `
+                export interface IProduct {
+                    id: string;
+                    title: string;
+                }
+            `);
+
+            const processor = new SchemaProcessor({
+                additionalProperties: false,
+                parallel: false,
+                verbose: false
+                // no glob or rootPath
+            });
+
+            const files: FileInfo[] = [
+                { path: file1 },
+                { path: file2 }
+            ];
+
+            const schemaMap = await processor.processFiles(files);
+
+            expect(schemaMap.size).toBe(2);
+            // Per-file: each file only has its own definitions
+            const schema1 = schemaMap.get(file1)!;
+            expect(schema1.definitions!.IUser).toBeDefined();
+            expect(schema1.definitions!.IProduct).toBeUndefined();
+        });
+
+        it("should include referenced types from non-schema files in single-pass output", async () => {
+            await createTestFile("shared/BaseType.ts", `
+                export interface IBaseType {
+                    id: string;
+                }
+            `);
+
+            const file1 = await createTestFile("a.jsonschema.ts", `
+                import { IBaseType } from "./shared/BaseType";
+                export interface ITypeA {
+                    base: IBaseType;
+                }
+            `);
+
+            const file2 = await createTestFile("b.jsonschema.ts", `
+                import { IBaseType } from "./shared/BaseType";
+                export interface ITypeB {
+                    base: IBaseType;
+                }
+            `);
+
+            const processor = new SchemaProcessor({
+                additionalProperties: false,
+                parallel: false,
+                verbose: false,
+                glob: "*.jsonschema.ts",
+                rootPath: testDir
+            });
+
+            const files: FileInfo[] = [
+                { path: file1 },
+                { path: file2 }
+            ];
+
+            const schemaMap = await processor.processFiles(files);
+            const mergedSchema = processor.mergeSchemas(schemaMap);
+
+            // IBaseType should appear in the merged output even though
+            // it's not directly in a .jsonschema.ts file
+            expect(mergedSchema.definitions!.IBaseType).toBeDefined();
+            expect(mergedSchema.definitions!.ITypeA).toBeDefined();
+            expect(mergedSchema.definitions!.ITypeB).toBeDefined();
+        });
+
+        it("should produce same merged schema whether using single-pass or per-file", async () => {
+            const file1 = await createTestFile("user.jsonschema.ts", `
+                export interface IUser {
+                    id: string;
+                    name: string;
+                }
+            `);
+
+            const file2 = await createTestFile("product.jsonschema.ts", `
+                export interface IProduct {
+                    id: string;
+                    title: string;
+                    price: number;
+                }
+            `);
+
+            const files: FileInfo[] = [
+                { path: file1 },
+                { path: file2 }
+            ];
+
+            // Single-pass (with glob/rootPath)
+            const singlePassProcessor = new SchemaProcessor({
+                additionalProperties: false,
+                parallel: false,
+                glob: "*.jsonschema.ts",
+                rootPath: testDir
+            });
+            const singlePassMap = await singlePassProcessor.processFiles(files);
+            const singlePassMerged = singlePassProcessor.mergeSchemas(singlePassMap);
+
+            // Per-file (without glob/rootPath)
+            const perFileProcessor = new SchemaProcessor({
+                additionalProperties: false,
+                parallel: false
+            });
+            const perFileMap = await perFileProcessor.processFiles(files);
+            const perFileMerged = perFileProcessor.mergeSchemas(perFileMap);
+
+            // Merged schemas should be identical
+            expect(singlePassMerged).toStrictEqual(perFileMerged);
+        });
+    });
+
     describe("error handling", () => {
         it("should handle missing files gracefully", async () => {
             const processor = new SchemaProcessor({

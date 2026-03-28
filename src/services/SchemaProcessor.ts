@@ -1,6 +1,8 @@
 import * as tsj from "ts-json-schema-generator";
 import { Config, Schema } from "ts-json-schema-generator";
 import assert from "assert";
+import path from "path";
+import { Project } from "ts-morph";
 import { SchemaGenerationError, DuplicateSymbolError } from "../errors";
 import { FileInfo } from "./FileDiscovery";
 
@@ -9,6 +11,8 @@ export interface SchemaProcessorOptions {
     tsconfigPath?: string;
     parallel?: boolean;
     verbose?: boolean;
+    glob?: string;
+    rootPath?: string;
 }
 
 export interface ProcessingResult {
@@ -21,8 +25,8 @@ export class SchemaProcessor {
     constructor(private options: SchemaProcessorOptions) {}
 
     public async processFiles(files: FileInfo[]): Promise<Map<string, Schema>> {
-        const { parallel = true, verbose = false } = this.options;
-        
+        const { parallel = true, verbose = false, glob, rootPath } = this.options;
+
         if (verbose) {
             console.log(`Processing ${files.length} files...`);
         }
@@ -30,11 +34,108 @@ export class SchemaProcessor {
         // Sort files by path to ensure consistent processing order
         const sortedFiles = [...files].sort((a, b) => a.path.localeCompare(b.path));
 
+        // Use single-pass processing when possible (avoids creating N TypeScript programs)
+        if (glob && rootPath && sortedFiles.length > 1) {
+            try {
+                return await this.processSinglePass(sortedFiles, rootPath, glob);
+            } catch (error) {
+                if (verbose) {
+                    console.log(`Single-pass processing failed, falling back to per-file processing: ${error instanceof Error ? error.message : String(error)}`);
+                }
+            }
+        }
+
         const results = parallel
             ? await this.processInParallel(sortedFiles)
             : await this.processSequentially(sortedFiles);
 
         return this.consolidateSchemas(results);
+    }
+
+    private async processSinglePass(
+        files: FileInfo[],
+        rootPath: string,
+        glob: string
+    ): Promise<Map<string, Schema>> {
+        const { additionalProperties, tsconfigPath, verbose } = this.options;
+
+        // Pre-check: scan all TS files in rootPath for duplicate exported type names.
+        // If duplicates exist, per-file processing is needed to detect schema conflicts.
+        if (this.hasDuplicateTypeNames(rootPath)) {
+            throw new Error("Duplicate type names detected across source files");
+        }
+
+        const resolvedRoot = path.resolve(rootPath);
+        const globPattern = path.join(resolvedRoot, "**", glob);
+
+        if (verbose) {
+            console.log(`Single-pass processing with pattern: ${globPattern}`);
+        }
+
+        const config: Config = {
+            path: globPattern,
+            type: "*",
+            additionalProperties,
+            encodeRefs: false,
+            sortProps: true,
+            ...(tsconfigPath ? { tsconfig: tsconfigPath } : {}),
+        };
+
+        const schemaGenerator = tsj.createGenerator(config);
+        const fullSchema = schemaGenerator.createSchema(config.type);
+
+        return this.partitionSchemaByFile(files, fullSchema);
+    }
+
+    private hasDuplicateTypeNames(rootPath: string): boolean {
+        const project = new Project({ skipAddingFilesFromTsConfig: true });
+        const allTsFiles = project.addSourceFilesAtPaths(
+            path.join(path.resolve(rootPath), "**/*.{ts,tsx}")
+        );
+
+        const seen = new Set<string>();
+
+        for (const sf of allTsFiles) {
+            const names: string[] = [];
+            for (const t of sf.getTypeAliases()) {
+                if (t.isExported()) names.push(t.getName());
+            }
+            for (const i of sf.getInterfaces()) {
+                if (i.isExported()) names.push(i.getName());
+            }
+            for (const e of sf.getEnums()) {
+                if (e.isExported()) names.push(e.getName());
+            }
+            for (const name of names) {
+                if (seen.has(name)) return true;
+                seen.add(name);
+            }
+        }
+
+        return false;
+    }
+
+    private partitionSchemaByFile(
+        files: FileInfo[],
+        fullSchema: Schema
+    ): Map<string, Schema> {
+        const defs = fullSchema.definitions ?? {};
+        const schemaVersion = fullSchema.$schema || "http://json-schema.org/draft-07/schema#";
+        const schemaMap = new Map<string, Schema>();
+
+        if (Object.keys(defs).length === 0) return schemaMap;
+
+        // Since we've verified no duplicate type names exist, assign all definitions
+        // to each file. Downstream code (extractTypeInfo) uses ts-morph to correctly
+        // attribute each definition to its actual source file.
+        for (const file of files) {
+            schemaMap.set(file.path, {
+                $schema: schemaVersion,
+                definitions: { ...defs },
+            });
+        }
+
+        return schemaMap;
     }
 
     private async processInParallel(files: FileInfo[]): Promise<ProcessingResult[]> {
