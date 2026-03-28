@@ -16,17 +16,19 @@ export interface FileInfo {
     path: string;
     hash?: string;
     lastModified?: Date;
+    changed?: boolean;
 }
 
 export class FileDiscovery {
     private cacheFile: string;
+    private schemaCacheFile: string;
     private fileCache: Map<string, string> = new Map();
+    private schemaCache: Map<string, object> = new Map();
 
     constructor(private options: FileDiscoveryOptions) {
-        this.cacheFile = path.join(
-            options.cachePath || ".ts-runtime-validation-cache",
-            "file-hashes.json"
-        );
+        const cacheDir = options.cachePath || ".ts-runtime-validation-cache";
+        this.cacheFile = path.join(cacheDir, "file-hashes.json");
+        this.schemaCacheFile = path.join(cacheDir, "schema-cache.json");
         if (options.cacheEnabled) {
             this.loadCache();
         }
@@ -75,14 +77,16 @@ export class FileDiscovery {
             files.map(async (filePath) => {
                 const stats = await fs.promises.stat(filePath);
                 const hash = await this.getFileHash(filePath);
+                const cachedHash = this.fileCache.get(filePath);
                 return {
                     path: filePath,
                     hash,
-                    lastModified: stats.mtime
+                    lastModified: stats.mtime,
+                    changed: cachedHash !== hash
                 };
             })
         );
-        
+
         await this.saveCache(enrichedFiles);
         return enrichedFiles;
     }
@@ -97,6 +101,23 @@ export class FileDiscovery {
         return cachedHash !== currentHash;
     }
 
+    public getCachedSchema(filePath: string): object | undefined {
+        return this.schemaCache.get(filePath);
+    }
+
+    public async saveSchemasToCache(schemas: Map<string, object>): Promise<void> {
+        const cacheDir = path.dirname(this.schemaCacheFile);
+        if (!fs.existsSync(cacheDir)) {
+            await fs.promises.mkdir(cacheDir, { recursive: true });
+        }
+        const data: Record<string, object> = {};
+        for (const [key, value] of schemas) {
+            data[key] = value;
+            this.schemaCache.set(key, value);
+        }
+        await fs.promises.writeFile(this.schemaCacheFile, JSON.stringify(data));
+    }
+
     private loadCache(): void {
         try {
             if (fs.existsSync(this.cacheFile)) {
@@ -105,9 +126,16 @@ export class FileDiscovery {
                 );
                 this.fileCache = new Map(Object.entries(cacheData));
             }
+            if (fs.existsSync(this.schemaCacheFile)) {
+                const schemaData = JSON.parse(
+                    fs.readFileSync(this.schemaCacheFile, 'utf-8')
+                );
+                this.schemaCache = new Map(Object.entries(schemaData));
+            }
         } catch (error) {
             console.warn('Failed to load cache, starting fresh');
             this.fileCache.clear();
+            this.schemaCache.clear();
         }
     }
 
@@ -133,8 +161,12 @@ export class FileDiscovery {
 
     public clearCache(): void {
         this.fileCache.clear();
+        this.schemaCache.clear();
         if (fs.existsSync(this.cacheFile)) {
             fs.unlinkSync(this.cacheFile);
+        }
+        if (fs.existsSync(this.schemaCacheFile)) {
+            fs.unlinkSync(this.schemaCacheFile);
         }
     }
 }

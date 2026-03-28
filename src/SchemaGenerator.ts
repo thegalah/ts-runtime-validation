@@ -1,11 +1,12 @@
 import { ICommandOptions } from "./ICommandOptions";
 import path from "path";
-import { FileDiscovery } from "./services/FileDiscovery";
+import { FileDiscovery, FileInfo } from "./services/FileDiscovery";
 import { SchemaProcessor } from "./services/SchemaProcessor";
 import { CodeGenerator } from "./services/CodeGenerator";
 import { SchemaWriter } from "./services/SchemaWriter";
 import { ProgressReporter } from "./utils/ProgressReporter";
 import { formatError, isKnownError } from "./errors";
+import { Schema } from "ts-json-schema-generator";
 
 const validationSchemaFileName = "validation.schema.json";
 const schemaDefinitionFileName = "SchemaDefinition.ts";
@@ -69,17 +70,51 @@ export class SchemaGenerator {
             // Discover files
             this.progressReporter.update(0, "Discovering files...");
             const files = await this.fileDiscovery.discoverFiles();
-            
+
             if (this.options.verbose) {
                 console.log(`Found ${files.length} schema file(s)`);
                 files.forEach(file => console.log(`  - ${file.path}`));
             }
-            
+
+            // Separate changed and unchanged files when caching is enabled
+            const cacheEnabled = this.options.cache || false;
+            let filesToProcess: FileInfo[];
+            const cachedSchemas = new Map<string, Schema>();
+
+            if (cacheEnabled) {
+                filesToProcess = files.filter(f => f.changed !== false);
+                const unchangedFiles = files.filter(f => f.changed === false);
+                for (const file of unchangedFiles) {
+                    const cached = this.fileDiscovery.getCachedSchema(file.path);
+                    if (cached) {
+                        cachedSchemas.set(file.path, cached as Schema);
+                    } else {
+                        // No cached schema available, must reprocess
+                        filesToProcess.push(file);
+                    }
+                }
+                if (this.options.verbose) {
+                    console.log(`Cache: ${cachedSchemas.size} unchanged, ${filesToProcess.length} to process`);
+                }
+            } else {
+                filesToProcess = files;
+            }
+
             // Process schemas
             this.progressReporter.update(1, "Processing TypeScript files...");
-            this.progressReporter.options.total = files.length + 4; // files + 4 generation steps
-            
-            const schemaMap = await this.schemaProcessor.processFiles(files);
+            this.progressReporter.options.total = filesToProcess.length + 4; // files + 4 generation steps
+
+            const processedSchemas = filesToProcess.length > 0
+                ? await this.schemaProcessor.processFiles(filesToProcess)
+                : new Map<string, Schema>();
+
+            // Merge processed and cached schemas
+            const schemaMap = new Map<string, Schema>([...cachedSchemas, ...processedSchemas]);
+
+            // Save all schemas to cache for next run
+            if (cacheEnabled) {
+                await this.fileDiscovery.saveSchemasToCache(schemaMap);
+            }
             
             if (schemaMap.size === 0) {
                 console.log("No types found to generate schemas for");
