@@ -4,36 +4,36 @@
 
 Automatically generate type-safe runtime validation from your existing TypeScript interfaces. Zero configuration, zero decorators - just add JSDoc comments for validation rules and get bulletproof runtime type checking with full TypeScript support.
 
-📖 **[Project Marketing Page](https://www.thegalah.com/projects/ts-runtime-validation)**
+**[Project Marketing Page](https://www.thegalah.com/projects/ts-runtime-validation)**
 
-## ✨ Features
+## Features
 
 ### Core Features
 
-- 🚀 **Zero-effort validation** - Automatically generates JSON Schema validators from TypeScript interfaces
-- 🔒 **Type-safe** - Full TypeScript support with type inference and type guards
-- 📦 **Lightweight** - Minimal dependencies, can be installed as a dev dependency
-- 🛠️ **CLI & Programmatic API** - Use as a CLI tool or integrate into your build process
-- 🎯 **Selective generation** - Control which types to validate using file naming conventions
-- 📝 **JSDoc annotations** - Add validation rules (min/max length, patterns, formats) directly in your TypeScript code
+- **Zero-effort validation** - Automatically generates JSON Schema validators from TypeScript interfaces
+- **Type-safe** - Full TypeScript support with type inference and type guards
+- **Lightweight** - Minimal dependencies, can be installed as a dev dependency
+- **CLI & Programmatic API** - Use as a CLI tool or integrate into your build process
+- **Selective generation** - Control which types to validate using file naming conventions
+- **JSDoc annotations** - Add validation rules (min/max length, patterns, formats) directly in your TypeScript code
 
 ### Performance & Optimization
 
-- ⚡ **Incremental builds** - File-based caching for faster subsequent builds
-- 🔄 **Parallel processing** - Concurrent file processing for improved performance
-- 📊 **Progress reporting** - Visual feedback for long-running operations
-- 🌳 **Tree-shaking friendly** - Generate optimized exports for smaller bundles
-- 💤 **Lazy loading** - Optional deferred validator initialization
-- 📦 **Minified output** - Compressed JSON schemas for production
-- 🔧 **Verbose logging** - Detailed debugging information when needed
+- **Incremental builds** - File-based caching for faster subsequent builds
+- **Parallel processing** - Concurrent file processing for improved performance
+- **Progress reporting** - Visual feedback for long-running operations
+- **Tree-shaking friendly** - Generate optimized exports for smaller bundles
+- **Lazy loading** - Optional deferred validator initialization
+- **Minified output** - Compressed JSON schemas for production
+- **Verbose logging** - Detailed debugging information when needed
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Node.js >= 12
 - TypeScript >= 4.0
 - `ajv` >= 8.11.0 (peer dependency for runtime validation)
 
-## 📦 Installation
+## Installation
 
 ```bash
 # Using yarn (recommended)
@@ -45,7 +45,7 @@ npm install --save-dev ts-runtime-validation
 npm install ajv  # Required peer dependency
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Mark your types for validation
 
@@ -155,7 +155,7 @@ if (isValidSchema(userData, "#/definitions/IUser")) {
 }
 ```
 
-## 📖 Usage
+## Usage
 
 ### CLI Options
 
@@ -322,7 +322,7 @@ ts-runtime-validation --cache --minify --no-parallel
 ts-runtime-validation --verbose --progress --no-parallel
 ```
 
-## 🚀 Performance & Optimization
+## Performance & Optimization
 
 ### Caching System
 
@@ -412,13 +412,13 @@ const getValidator = () => {
 };
 ```
 
-## ⚠️ Limitations
+## Limitations
 
 - **No duplicate type names** - Each interface/type must have a unique name across all schema files
 - **TypeScript-only constructs** - Some advanced TypeScript features (like conditional types) may not be fully supported
 - **Circular references** - Limited support for circular type references
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
@@ -461,7 +461,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed information about:
 - Performance optimization techniques
 - Testing approaches and best practices
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built with modern tools and optimized for performance:
 
@@ -471,7 +471,7 @@ Built with modern tools and optimized for performance:
 - [fdir](https://github.com/thecodrr/fdir) - Fast file system traversal
 - [picomatch](https://github.com/micromatch/picomatch) - Efficient glob pattern matching
 
-## 📚 Related Projects & Comparisons
+## Related Projects & Comparisons
 
 ### How ts-runtime-validation differs from alternatives:
 
@@ -486,21 +486,21 @@ Built with modern tools and optimized for performance:
 
 **ts-runtime-validation**:
 
-- ✅ **Zero runtime API** - Works with your existing TypeScript interfaces
-- ✅ **Build-time generation** - No runtime overhead for schema creation
-- ✅ **JSDoc validation rules** - Add constraints via comments
-- ✅ **Intelligent caching** - Fast incremental builds with change detection
-- ✅ **Performance optimized** - Parallel processing and bundle optimization
-- ❌ **Requires build step** - Must regenerate when types change
-- ❌ **No runtime schema composition** - Can't dynamically create schemas
+-**Zero runtime API** - Works with your existing TypeScript interfaces
+-**Build-time generation** - No runtime overhead for schema creation
+-**JSDoc validation rules** - Add constraints via comments
+-**Intelligent caching** - Fast incremental builds with change detection
+-**Performance optimized** - Parallel processing and bundle optimization
+-**Requires build step** - Must regenerate when types change
+-**No runtime schema composition** - Can't dynamically create schemas
 
 **zod/io-ts/yup**:
 
-- ✅ **Runtime flexibility** - Create and compose schemas dynamically
-- ✅ **Single source of truth** - Schema and type defined together
-- ✅ **No build step** - Works immediately in your code
-- ❌ **Runtime overhead** - Schemas created at runtime
-- ❌ **Duplicate type definitions** - Can't reuse existing TypeScript interfaces
+-**Runtime flexibility** - Create and compose schemas dynamically
+-**Single source of truth** - Schema and type defined together
+-**No build step** - Works immediately in your code
+-**Runtime overhead** - Schemas created at runtime
+-**Duplicate type definitions** - Can't reuse existing TypeScript interfaces
 
 Choose **ts-runtime-validation** when you:
 
@@ -519,7 +519,7 @@ Choose **alternatives** when you:
 - Need complex runtime transformations or coercions
 - Want extensive built-in validation methods and error messages
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Generated files are not updating
 
@@ -533,7 +533,7 @@ ts-runtime-validation --cache
 
 ### Hash inconsistencies between runs
 
-Version 1.8.0+ includes fixes for deterministic output generation. If you're experiencing different file hashes between runs, ensure you're using the latest version.
+Version 1.8.2+ includes fixes for deterministic output generation. If you're experiencing different file hashes between runs, ensure you're using the latest version.
 
 ### Performance issues with large projects
 
