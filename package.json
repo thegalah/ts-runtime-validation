@@ -1,6 +1,6 @@
 {
     "name": "ts-runtime-validation",
-    "version": "1.8.1",
+    "version": "1.8.2",
     "author": "Matthew Duong <thegalah@gmail.com>",
     "license": "MIT",
     "dependencies": {

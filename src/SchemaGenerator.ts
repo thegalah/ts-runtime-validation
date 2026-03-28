@@ -37,7 +37,9 @@ export class SchemaGenerator {
             additionalProperties: options.additionalProperties,
             tsconfigPath: options.tsconfigPath || undefined,
             parallel: options.parallel !== false,
-            verbose: options.verbose || false
+            verbose: options.verbose || false,
+            glob: options.glob,
+            rootPath: options.rootPath
         });
         
         this.codeGenerator = new CodeGenerator({
